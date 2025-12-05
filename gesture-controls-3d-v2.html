@@ -183,10 +183,8 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <!-- MediaPipe -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <!-- New MediaPipe Tasks API -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -209,7 +207,7 @@
                     <div id="hand-status" class="dot"></div>
                     <span>System Status</span>
                 </div>
-                <div id="gesture-data" class="data-readout">Waiting for hand...</div>
+                <div id="gesture-data" class="data-readout">Initializing...</div>
             </div>
 
             <div class="panel-box">
@@ -224,7 +222,7 @@
         </div>
 
         <div id="video-container">
-            <video id="input_video"></video>
+            <video id="input_video" autoplay muted playsinline></video>
         </div>
         
         <div id="loading">Loading Model...</div>
@@ -325,7 +323,7 @@
             });
         });
 
-        // --- 3. MediaPipe Logic ---
+        // --- 3. New MediaPipe HandLandmarker Setup ---
         const videoElement = document.getElementById('input_video');
         const handStatusDot = document.getElementById('hand-status');
         const gestureDataText = document.getElementById('gesture-data');
@@ -335,11 +333,28 @@
         let targetRot = { x: 0, y: 0, z: 0 };
         const LERP_SPEED = 0.08; // Lower = smoother, Higher = faster response
 
+        let handLandmarker;
+        let lastVideoTime = -1;
+
+        async function createHandLandmarker() {
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+            );
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+            gestureDataText.innerText = "Hand tracker ready. Show your hand!";
+        }
+
         function onResults(results) {
-            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            if (results.landmarks && results.landmarks.length > 0) {
                 handStatusDot.classList.add('active');
                 
-                const landmarks = results.multiHandLandmarks[0];
+                const landmarks = results.landmarks[0];
                 
                 // --- SCALING (Pinch) ---
                 const thumbTip = landmarks[4];
@@ -398,27 +413,36 @@
             }
         }
 
-        const hands = new Hands({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-        }});
+        function renderLoop() {
+            if (!handLandmarker) {
+                requestAnimationFrame(renderLoop);
+                return;
+            }
+            const startTimeMs = performance.now();
+            if (lastVideoTime !== videoElement.currentTime) {
+                lastVideoTime = videoElement.currentTime;
+                const results = handLandmarker.detectForVideo(videoElement, startTimeMs);
+                onResults(results);
+            }
+            requestAnimationFrame(renderLoop);
+        }
 
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.7
-        });
+        // Start camera and detection
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+                videoElement.srcObject = stream;
+                await createHandLandmarker();
+                videoElement.addEventListener('loadeddata', () => {
+                    renderLoop();
+                });
+            } catch (error) {
+                console.error('Camera access denied:', error);
+                gestureDataText.innerText = "Camera access denied";
+            }
+        }
 
-        hands.onResults(onResults);
-
-        const cameraUtils = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({image: videoElement});
-            },
-            width: 320,
-            height: 240
-        });
-        cameraUtils.start();
+        startCamera();
 
         // --- 4. Animation Loop ---
         function animate() {
