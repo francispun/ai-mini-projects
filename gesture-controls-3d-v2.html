@@ -337,17 +337,22 @@
         let lastVideoTime = -1;
 
         async function createHandLandmarker() {
-            const vision = await FilesetResolver.forVisionTasks(
-                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-            );
-            handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                baseOptions: {
-                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`
-                },
-                runningMode: "VIDEO",
-                numHands: 1
-            });
-            gestureDataText.innerText = "Hand tracker ready. Show your hand!";
+            try {
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+                );
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 1
+                });
+                gestureDataText.innerText = "Hand tracker ready. Show your hand!";
+            } catch (error) {
+                console.error('HandLandmarker init failed:', error);
+                gestureDataText.innerText = "Detection init failed";
+            }
         }
 
         function onResults(results) {
@@ -414,7 +419,7 @@
         }
 
         function renderLoop() {
-            if (!handLandmarker) {
+            if (!handLandmarker || !videoElement.srcObject) {
                 requestAnimationFrame(renderLoop);
                 return;
             }
@@ -429,16 +434,34 @@
 
         // Start camera and detection
         async function startCamera() {
+            // Check for secure context
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error('getUserMedia not supported - check HTTPS!');
+                gestureDataText.innerText = "HTTPS required for camera (use ngrok?)";
+                return;
+            }
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 320, 
+                        height: 240, 
+                        facingMode: 'user'  // Prefer front camera on iOS
+                    } 
+                });
                 videoElement.srcObject = stream;
+                console.log('Camera stream started successfully');
                 await createHandLandmarker();
                 videoElement.addEventListener('loadeddata', () => {
                     renderLoop();
                 });
             } catch (error) {
-                console.error('Camera access denied:', error);
-                gestureDataText.innerText = "Camera access denied";
+                console.error('Camera access failed:', error.name, error.message);
+                let msg = "Camera access denied";
+                if (error.name === 'NotAllowedError') msg += " - Grant permission?";
+                else if (error.name === 'NotFoundError') msg = "No camera found";
+                else if (error.name === 'NotReadableError') msg = "Camera in use elsewhere";
+                gestureDataText.innerText = msg;
             }
         }
 
