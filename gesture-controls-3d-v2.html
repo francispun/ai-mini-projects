@@ -1,52 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... your existing styles ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Gesture Rotation Interface</title>
     <style>
-        /* ... your existing styles ... */
-        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #121212 100%);
+        }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: auto;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #00ff88;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input[type="file"] { display: none; }
+
+        .custom-file-upload {
+            border: 1px solid #444;
+            background: #222;
+            color: #eee;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .custom-file-upload:hover {
+            background: #00ff88;
+            color: #000;
+            border-color: #00ff88;
+        }
+
+        /* Webcam Preview */
+        #video-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            background: #000;
+        }
+
         #input_video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* transform: scaleX(-1); */ /* Comment out for iOS testing - causes black screen on streams */
+            transform: scaleX(-1); /* Mirror */
+        }
+
+        /* Status & Instructions */
+        #info-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid #00ff88;
+            backdrop-filter: blur(5px);
+            max-width: 250px;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #555;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background-color: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .instruction-list {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 0.8rem;
+            color: #ccc;
+            line-height: 1.6;
         }
         
-        /* ... rest unchanged ... */
+        .data-readout {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #00ff88;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
     </style>
     
-    <!-- Updated MediaPipe CDNs (latest stable as of Dec 2025) -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1695469240/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.4.1695469240/control_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1695469240/hands.js" crossorigin="anonymous"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <!-- ... your existing body ... -->
-    
-    <div id="video-container">
-        <video id="input_video" playsinline muted></video> <!-- Added playsinline and muted for iOS compatibility -->
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <header>
+            <h1>3D Gesture Viewer</h1>
+            <div class="controls">
+                <label for="file-upload" class="custom-file-upload">
+                    Open .GLB File
+                </label>
+                <input id="file-upload" type="file" accept=".glb,.gltf"/>
+            </div>
+        </header>
+
+        <div id="info-panel">
+            <div class="panel-box">
+                <div class="status-header">
+                    <div id="hand-status" class="dot"></div>
+                    <span>System Status</span>
+                </div>
+                <div id="gesture-data" class="data-readout">Waiting for hand...</div>
+            </div>
+
+            <div class="panel-box">
+                <div class="status-header">Controls</div>
+                <ul class="instruction-list">
+                    <li><strong>Rotate X:</strong> Move Hand Up/Down</li>
+                    <li><strong>Rotate Y:</strong> Move Hand Left/Right</li>
+                    <li><strong>Rotate Z:</strong> Tilt Hand Left/Right</li>
+                    <li><strong>Scale:</strong> Pinch Thumb & Index</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="video-container">
+            <video id="input_video"></video>
+        </div>
+        
+        <div id="loading">Loading Model...</div>
     </div>
-    
-    <!-- ... rest unchanged ... -->
-    
+
     <script>
-        // ... your existing Three.js setup unchanged ...
+        // --- 1. Three.js Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
         
-        // --- 3. MediaPipe Logic (updated) ---
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 6;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.outputEncoding = THREE.sRGBEncoding; // Better colors for GLB
+        container.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+        
+        const fillLight = new THREE.DirectionalLight(0x00ff88, 0.5);
+        fillLight.position.set(-5, 0, 2);
+        scene.add(fillLight);
+
+        // Subtle Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0x333333, 0x111111);
+        gridHelper.position.y = -2;
+        scene.add(gridHelper);
+
+        // Target Group (Holds the model)
+        let targetObject = new THREE.Group();
+        scene.add(targetObject);
+
+        // Default Placeholder (Icosahedron)
+        const geometry = new THREE.IcosahedronGeometry(1, 0);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x222222, 
+            wireframe: true,
+            emissive: 0x00ff88,
+            emissiveIntensity: 0.5
+        });
+        const placeholder = new THREE.Mesh(geometry, material);
+        targetObject.add(placeholder);
+
+        // --- 2. GLB Loader ---
+        const loader = new THREE.GLTFLoader();
+        const fileInput = document.getElementById('file-upload');
+        const loadingText = document.getElementById('loading');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+            loadingText.style.display = 'block';
+
+            loader.load(url, (gltf) => {
+                // Clear previous
+                while(targetObject.children.length > 0){ 
+                    targetObject.remove(targetObject.children[0]); 
+                }
+
+                const model = gltf.scene;
+                
+                // Auto-center and Auto-scale
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                
+                // Reset position to center
+                model.position.sub(center);
+                
+                // Scale to fit view
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scaleFactor = 3 / maxDim;
+                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+                targetObject.add(model);
+                
+                // Reset container transforms
+                targetObject.rotation.set(0,0,0);
+                targetScale = 1;
+
+                loadingText.style.display = 'none';
+            }, undefined, (error) => {
+                console.error(error);
+                loadingText.innerText = "Error";
+            });
+        });
+
+        // --- 3. MediaPipe Logic ---
         const videoElement = document.getElementById('input_video');
-        // ... existing vars ...
-        
-        // ... onResults unchanged ...
-        
+        const handStatusDot = document.getElementById('hand-status');
+        const gestureDataText = document.getElementById('gesture-data');
+
+        // State for smoothing
+        let targetScale = 1;
+        let targetRot = { x: 0, y: 0, z: 0 };
+        const LERP_SPEED = 0.08; // Lower = smoother, Higher = faster response
+
+        function onResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                handStatusDot.classList.add('active');
+                
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // --- SCALING (Pinch) ---
+                const thumbTip = landmarks[4];
+                const indexTip = landmarks[8];
+                const pinchDist = Math.sqrt(
+                    Math.pow(indexTip.x - thumbTip.x, 2) + 
+                    Math.pow(indexTip.y - thumbTip.y, 2)
+                );
+                
+                // Map pinch distance (approx 0.02 to 0.3) to Scale (0.5 to 3.0)
+                let s = (pinchDist - 0.02) * 8;
+                if(s < 0.5) s = 0.5;
+                if(s > 3.5) s = 3.5;
+                targetScale = s;
+
+                // --- ROTATION ---
+                
+                // 1. Y-Axis Rotation (Yaw): Based on Hand X Position
+                // Center of hand (approx Landmark 9 - Middle Finger MCP)
+                const handX = landmarks[9].x; 
+                // Map 0 (left) -> -PI, 1 (right) -> PI
+                // Invert because webcam is mirrored
+                targetRot.y = (handX - 0.5) * Math.PI * 2; 
+
+                // 2. X-Axis Rotation (Pitch): Based on Hand Y Position
+                const handY = landmarks[9].y;
+                // Map 0 (top) -> -PI/2, 1 (bottom) -> PI/2
+                targetRot.x = (handY - 0.5) * Math.PI;
+
+                // 3. Z-Axis Rotation (Roll): Based on Hand Tilt
+                // Angle between Wrist (0) and Middle Finger MCP (9)
+                const wrist = landmarks[0];
+                const middleBase = landmarks[9];
+                
+                // Calculate angle in radians
+                // Note: Y increases downwards in MediaPipe
+                const dx = middleBase.x - wrist.x;
+                const dy = middleBase.y - wrist.y;
+                
+                // -PI/2 is upright hand. We want upright to be 0 rotation.
+                // Math.atan2(dy, dx) gives angle relative to X axis.
+                // We subtract -PI/2 (or +PI/2 depending on coord system) to normalize.
+                let angle = Math.atan2(dy, dx);
+                
+                // Normalize so upright hand is roughly 0
+                // In screen coords, upright is roughly -PI/2
+                targetRot.z = angle + (Math.PI / 2); 
+
+                gestureDataText.innerText = `S:${targetScale.toFixed(1)} X:${targetRot.x.toFixed(1)} Y:${targetRot.y.toFixed(1)} Z:${targetRot.z.toFixed(1)}`;
+
+            } else {
+                handStatusDot.classList.remove('active');
+                gestureDataText.innerText = "No hand detected";
+                // Optional: Auto-rotate slowly when idle
+                targetRot.y += 0.005; 
+            }
+        }
+
         const hands = new Hands({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1695469240/${file}`;
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
         }});
 
         hands.setOptions({
             maxNumHands: 1,
             modelComplexity: 1,
-            minDetectionConfidence: 0.5, // Lowered slightly for iOS edge cases
-            minTrackingConfidence: 0.5
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
         });
 
         hands.onResults(onResults);
@@ -58,24 +418,33 @@
             width: 320,
             height: 240
         });
-        
-        // Add error handling for stream start
-        cameraUtils.onError = (error) => {
-            console.error('Camera error:', error);
-            gestureDataText.innerText = `Camera error: ${error.message}`;
-        };
-        
-        cameraUtils.start()
-            .then(() => {
-                // Explicit play() nudge for iOS stream rendering
-                videoElement.play().catch(e => console.warn('iOS play warning:', e));
-            })
-            .catch(error => {
-                console.error('Failed to start camera:', error);
-                gestureDataText.innerText = `Start failed: ${error.message}`;
-            });
+        cameraUtils.start();
 
-        // ... rest of script unchanged ...
+        // --- 4. Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. Smooth Scale
+            const currentScale = targetObject.scale.x;
+            const newScale = THREE.MathUtils.lerp(currentScale, targetScale, LERP_SPEED);
+            targetObject.scale.set(newScale, newScale, newScale);
+
+            // 2. Smooth Rotation
+            targetObject.rotation.x = THREE.MathUtils.lerp(targetObject.rotation.x, targetRot.x, LERP_SPEED);
+            targetObject.rotation.y = THREE.MathUtils.lerp(targetObject.rotation.y, targetRot.y, LERP_SPEED);
+            targetObject.rotation.z = THREE.MathUtils.lerp(targetObject.rotation.z, targetRot.z, LERP_SPEED);
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
     </script>
 </body>
 </html>
