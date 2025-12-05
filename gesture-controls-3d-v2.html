@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>3D Gesture Rotation Interface</title>
     <style>
         body {
@@ -11,6 +11,8 @@
             background-color: #121212;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior: none;
         }
 
         #canvas-container {
@@ -93,8 +95,8 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 200px;
-            height: 150px;
+            width: 160px; /* Slightly smaller for mobile */
+            height: 120px;
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid rgba(0, 255, 136, 0.3);
@@ -177,6 +179,19 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+        
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            #video-container {
+                width: 120px;
+                height: 90px;
+            }
+        }
 
     </style>
     
@@ -224,7 +239,11 @@
         </div>
 
         <div id="video-container">
-            <video id="input_video"></video>
+            <!-- 
+                CRITICAL FIX FOR IOS: 
+                playsinline, webkit-playsinline, muted, autoplay 
+            -->
+            <video id="input_video" playsinline webkit-playsinline muted autoplay></video>
         </div>
         
         <div id="loading">Loading Model...</div>
@@ -243,7 +262,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.outputEncoding = THREE.sRGBEncoding; // Better colors for GLB
+        renderer.outputEncoding = THREE.sRGBEncoding; 
         container.appendChild(renderer.domElement);
 
         // Lighting
@@ -259,16 +278,16 @@
         fillLight.position.set(-5, 0, 2);
         scene.add(fillLight);
 
-        // Subtle Grid
+        // Grid
         const gridHelper = new THREE.GridHelper(30, 30, 0x333333, 0x111111);
         gridHelper.position.y = -2;
         scene.add(gridHelper);
 
-        // Target Group (Holds the model)
+        // Target Group
         let targetObject = new THREE.Group();
         scene.add(targetObject);
 
-        // Default Placeholder (Icosahedron)
+        // Default Placeholder
         const geometry = new THREE.IcosahedronGeometry(1, 0);
         const material = new THREE.MeshStandardMaterial({ 
             color: 0x222222, 
@@ -292,29 +311,21 @@
             loadingText.style.display = 'block';
 
             loader.load(url, (gltf) => {
-                // Clear previous
                 while(targetObject.children.length > 0){ 
                     targetObject.remove(targetObject.children[0]); 
                 }
 
                 const model = gltf.scene;
-                
-                // Auto-center and Auto-scale
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3());
                 
-                // Reset position to center
                 model.position.sub(center);
-                
-                // Scale to fit view
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const scaleFactor = 3 / maxDim;
                 model.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
                 targetObject.add(model);
-                
-                // Reset container transforms
                 targetObject.rotation.set(0,0,0);
                 targetScale = 1;
 
@@ -330,10 +341,9 @@
         const handStatusDot = document.getElementById('hand-status');
         const gestureDataText = document.getElementById('gesture-data');
 
-        // State for smoothing
         let targetScale = 1;
         let targetRot = { x: 0, y: 0, z: 0 };
-        const LERP_SPEED = 0.08; // Lower = smoother, Higher = faster response
+        const LERP_SPEED = 0.08; 
 
         function onResults(results) {
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
@@ -341,7 +351,7 @@
                 
                 const landmarks = results.multiHandLandmarks[0];
                 
-                // --- SCALING (Pinch) ---
+                // Pinch Scale
                 const thumbTip = landmarks[4];
                 const indexTip = landmarks[8];
                 const pinchDist = Math.sqrt(
@@ -349,43 +359,23 @@
                     Math.pow(indexTip.y - thumbTip.y, 2)
                 );
                 
-                // Map pinch distance (approx 0.02 to 0.3) to Scale (0.5 to 3.0)
                 let s = (pinchDist - 0.02) * 8;
                 if(s < 0.5) s = 0.5;
                 if(s > 3.5) s = 3.5;
                 targetScale = s;
 
-                // --- ROTATION ---
-                
-                // 1. Y-Axis Rotation (Yaw): Based on Hand X Position
-                // Center of hand (approx Landmark 9 - Middle Finger MCP)
+                // Rotation Logic
                 const handX = landmarks[9].x; 
-                // Map 0 (left) -> -PI, 1 (right) -> PI
-                // Invert because webcam is mirrored
                 targetRot.y = (handX - 0.5) * Math.PI * 2; 
 
-                // 2. X-Axis Rotation (Pitch): Based on Hand Y Position
                 const handY = landmarks[9].y;
-                // Map 0 (top) -> -PI/2, 1 (bottom) -> PI/2
                 targetRot.x = (handY - 0.5) * Math.PI;
 
-                // 3. Z-Axis Rotation (Roll): Based on Hand Tilt
-                // Angle between Wrist (0) and Middle Finger MCP (9)
                 const wrist = landmarks[0];
                 const middleBase = landmarks[9];
-                
-                // Calculate angle in radians
-                // Note: Y increases downwards in MediaPipe
                 const dx = middleBase.x - wrist.x;
                 const dy = middleBase.y - wrist.y;
-                
-                // -PI/2 is upright hand. We want upright to be 0 rotation.
-                // Math.atan2(dy, dx) gives angle relative to X axis.
-                // We subtract -PI/2 (or +PI/2 depending on coord system) to normalize.
                 let angle = Math.atan2(dy, dx);
-                
-                // Normalize so upright hand is roughly 0
-                // In screen coords, upright is roughly -PI/2
                 targetRot.z = angle + (Math.PI / 2); 
 
                 gestureDataText.innerText = `S:${targetScale.toFixed(1)} X:${targetRot.x.toFixed(1)} Y:${targetRot.y.toFixed(1)} Z:${targetRot.z.toFixed(1)}`;
@@ -393,7 +383,6 @@
             } else {
                 handStatusDot.classList.remove('active');
                 gestureDataText.innerText = "No hand detected";
-                // Optional: Auto-rotate slowly when idle
                 targetRot.y += 0.005; 
             }
         }
@@ -404,32 +393,38 @@
 
         hands.setOptions({
             maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.7
+            modelComplexity: 1, // Keep at 1 for mobile performance
+            minDetectionConfidence: 0.6,
+            minTrackingConfidence: 0.6
         });
 
         hands.onResults(onResults);
 
+        // Initialize Camera
         const cameraUtils = new Camera(videoElement, {
             onFrame: async () => {
                 await hands.send({image: videoElement});
             },
-            width: 320,
-            height: 240
+            // Relaxed constraints for mobile compatibility
+            width: { ideal: 320 },
+            height: { ideal: 240 },
+            facingMode: "user" 
         });
-        cameraUtils.start();
+        
+        // Explicitly handle play promise to catch mobile errors
+        cameraUtils.start().catch(err => {
+            console.error("Camera start error:", err);
+            gestureDataText.innerText = "Cam Error: Check Permissions";
+        });
 
         // --- 4. Animation Loop ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Smooth Scale
             const currentScale = targetObject.scale.x;
             const newScale = THREE.MathUtils.lerp(currentScale, targetScale, LERP_SPEED);
             targetObject.scale.set(newScale, newScale, newScale);
 
-            // 2. Smooth Rotation
             targetObject.rotation.x = THREE.MathUtils.lerp(targetObject.rotation.x, targetRot.x, LERP_SPEED);
             targetObject.rotation.y = THREE.MathUtils.lerp(targetObject.rotation.y, targetRot.y, LERP_SPEED);
             targetObject.rotation.z = THREE.MathUtils.lerp(targetObject.rotation.z, targetRot.z, LERP_SPEED);
