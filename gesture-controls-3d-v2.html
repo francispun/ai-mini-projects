@@ -11,7 +11,6 @@
             background-color: #121212;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            /* Prevent pull-to-refresh on mobile */
             overscroll-behavior: none;
         }
 
@@ -53,6 +52,8 @@
             max-width: 900px;
             margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -90,12 +91,44 @@
             border-color: #00ff88;
         }
 
+        /* Toggle Button */
+        #toggle-info-btn {
+            position: absolute;
+            top: 90px; /* Positioned below header */
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ff88;
+            border-radius: 50%;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        #toggle-info-btn:hover {
+            background: #00ff88;
+            color: #000;
+        }
+
+        #toggle-info-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
         /* Webcam Preview */
         #video-container {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 160px; /* Slightly smaller for mobile */
+            width: 160px;
             height: 120px;
             border-radius: 12px;
             overflow: hidden;
@@ -112,14 +145,23 @@
             transform: scaleX(-1); /* Mirror */
         }
 
-        /* Status & Instructions */
+        /* Status & Instructions Container */
         #info-panel {
             position: absolute;
-            top: 100px;
+            top: 140px; /* Below the toggle button */
             left: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: top left;
+        }
+
+        /* Hidden State Class */
+        #info-panel.hidden {
+            opacity: 0;
+            transform: scale(0.9) translateX(-20px);
+            pointer-events: none;
         }
 
         .panel-box {
@@ -186,10 +228,23 @@
                 flex-direction: column;
                 gap: 10px;
                 text-align: center;
+                padding: 10px;
             }
+            h1 { font-size: 1rem; }
+            
+            #toggle-info-btn {
+                top: 100px; /* Adjust based on header height */
+            }
+            
+            #info-panel {
+                top: 150px;
+            }
+
             #video-container {
-                width: 120px;
-                height: 90px;
+                width: 100px;
+                height: 75px;
+                bottom: 10px;
+                right: 10px;
             }
         }
 
@@ -212,11 +267,19 @@
             <h1>3D Gesture Viewer</h1>
             <div class="controls">
                 <label for="file-upload" class="custom-file-upload">
-                    Open .GLB File
+                    Open .GLB
                 </label>
                 <input id="file-upload" type="file" accept=".glb,.gltf"/>
             </div>
         </header>
+
+        <!-- Toggle Button -->
+        <button id="toggle-info-btn" aria-label="Toggle Info">
+            <!-- Simple Info Icon SVG -->
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+        </button>
 
         <div id="info-panel">
             <div class="panel-box">
@@ -230,19 +293,15 @@
             <div class="panel-box">
                 <div class="status-header">Controls</div>
                 <ul class="instruction-list">
-                    <li><strong>Rotate X:</strong> Move Hand Up/Down</li>
-                    <li><strong>Rotate Y:</strong> Move Hand Left/Right</li>
-                    <li><strong>Rotate Z:</strong> Tilt Hand Left/Right</li>
-                    <li><strong>Scale:</strong> Pinch Thumb & Index</li>
+                    <li><strong>Rotate X:</strong> Hand Up/Down</li>
+                    <li><strong>Rotate Y:</strong> Hand Left/Right</li>
+                    <li><strong>Rotate Z:</strong> Tilt Hand</li>
+                    <li><strong>Scale:</strong> Pinch</li>
                 </ul>
             </div>
         </div>
 
         <div id="video-container">
-            <!-- 
-                CRITICAL FIX FOR IOS: 
-                playsinline, webkit-playsinline, muted, autoplay 
-            -->
             <video id="input_video" playsinline webkit-playsinline muted autoplay></video>
         </div>
         
@@ -250,6 +309,14 @@
     </div>
 
     <script>
+        // --- Toggle Logic ---
+        const toggleBtn = document.getElementById('toggle-info-btn');
+        const infoPanel = document.getElementById('info-panel');
+        
+        toggleBtn.addEventListener('click', () => {
+            infoPanel.classList.toggle('hidden');
+        });
+
         // --- 1. Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -393,7 +460,7 @@
 
         hands.setOptions({
             maxNumHands: 1,
-            modelComplexity: 1, // Keep at 1 for mobile performance
+            modelComplexity: 1, 
             minDetectionConfidence: 0.6,
             minTrackingConfidence: 0.6
         });
@@ -405,13 +472,11 @@
             onFrame: async () => {
                 await hands.send({image: videoElement});
             },
-            // Relaxed constraints for mobile compatibility
             width: { ideal: 320 },
             height: { ideal: 240 },
             facingMode: "user" 
         });
         
-        // Explicitly handle play promise to catch mobile errors
         cameraUtils.start().catch(err => {
             console.error("Camera start error:", err);
             gestureDataText.innerText = "Cam Error: Check Permissions";
