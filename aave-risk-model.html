@@ -35,8 +35,8 @@
                         <input type="number" id="eth-borrow" value="0" step="0.01" min="0" onfocus="if(this.value==='0')this.value=''" onblur="if(this.value==='')this.value='0'" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="eth-lt" class="block text-sm font-medium text-gray-600">Liquidation Threshold (default 0.825)</label>
-                        <input type="number" id="eth-lt" value="0.825" step="0.001" min="0" max="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                        <label for="eth-lt" class="block text-sm font-medium text-gray-600">Liquidation Threshold (default 0.78)</label>
+                        <input type="number" id="eth-lt" value="0.78" step="0.001" min="0" max="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
@@ -54,8 +54,8 @@
                         <input type="number" id="op-borrow" value="0" step="0.01" min="0" onfocus="if(this.value==='0')this.value=''" onblur="if(this.value==='')this.value='0'" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="op-lt" class="block text-sm font-medium text-gray-600">Liquidation Threshold (default 0.80)</label>
-                        <input type="number" id="op-lt" value="0.80" step="0.001" min="0" max="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                        <label for="op-lt" class="block text-sm font-medium text-gray-600">Liquidation Threshold (default 0.78)</label>
+                        <input type="number" id="op-lt" value="0.78" step="0.001" min="0" max="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
@@ -113,11 +113,11 @@
         async function calculate() {
             const ethSupply = parseFloat(document.getElementById('eth-supply').value) || 0;
             const ethBorrow = parseFloat(document.getElementById('eth-borrow').value) || 0;
-            const ethLt = parseFloat(document.getElementById('eth-lt').value) || 0.825;
+            const ethLt = parseFloat(document.getElementById('eth-lt').value) || 0.78;
             
             const opSupply = parseFloat(document.getElementById('op-supply').value) || 0;
             const opBorrow = parseFloat(document.getElementById('op-borrow').value) || 0;
-            const opLt = parseFloat(document.getElementById('op-lt').value) || 0.80;
+            const opLt = parseFloat(document.getElementById('op-lt').value) || 0.78;
             
             const safetyMargin = parseFloat(document.getElementById('safety-margin').value) || 8;
             const saferLtMultiplier = 1 - safetyMargin / 100;
