@@ -130,7 +130,7 @@
 </head>
 <body>
   <h1>每日運動時間表</h1>
-  <p style="text-align:center; color:#555; font-size:1.1em;">（家居練習，每日1-2次，每次10-20分鐘）</p>
+  <p style="text-align:center; color:#555; font-size:1.1em;">（家居練習，每日1-2組）</p>
 
   <div class="section">
     <h2>每日建議流程</h2>
@@ -377,9 +377,9 @@
         todayText = '今日尚未完成任何運動。';
       } else {
         todayText = '今日完成：' +
-          `${exerciseNames.knee} ${(todayData.knee || 0)}/${config.knee.totalReps} 次， ` +
-          `${exerciseNames.seated} ${(todayData.seated || 0)}/${config.seated.totalReps} 次， ` +
-          `${exerciseNames.bridge} ${(todayData.bridge || 0)}/${config.bridge.totalReps} 次`;
+          `${exerciseNames.knee} ${(todayData.knee || 0)}次， ` +
+          `${exerciseNames.seated} ${(todayData.seated || 0)}次， ` +
+          `${exerciseNames.bridge} ${(todayData.bridge || 0)}次`;
       }
       document.getElementById('today-record').textContent = todayText;
 
@@ -388,9 +388,9 @@
         let sumYesterday = (yesterdayData.knee || 0) + (yesterdayData.seated || 0) + (yesterdayData.bridge || 0);
         if (sumYesterday > 0) {
           yesterdayText = '昨日完成：' +
-            `${exerciseNames.knee} ${(yesterdayData.knee || 0)}/${config.knee.totalReps} 次， ` +
-            `${exerciseNames.seated} ${(yesterdayData.seated || 0)}/${config.seated.totalReps} 次， ` +
-            `${exerciseNames.bridge} ${(yesterdayData.bridge || 0)}/${config.bridge.totalReps} 次`;
+            `${exerciseNames.knee} ${(yesterdayData.knee || 0)}次， ` +
+            `${exerciseNames.seated} ${(yesterdayData.seated || 0)}次， ` +
+            `${exerciseNames.bridge} ${(yesterdayData.bridge || 0)}次`;
         }
       }
       document.getElementById('yesterday-record').textContent = yesterdayText;
