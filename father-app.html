@@ -3,51 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>爸爸每日運動時間表</title>
+  <title>每日運動時間表</title>
   <style>
     body {
       font-family: 'Microsoft JhengHei', 'Helvetica Neue', Arial, sans-serif;
       background-color: #f8f9fa;
       color: #333;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       line-height: 1.6;
     }
     h1, h2 { text-align: center; color: #2c3e50; }
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
     .record-section {
       background: #e9ecef;
-      padding: 15px;
-      margin: 0 0 20px 0;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      border-radius: 12px;
     }
-    .record-section p { margin: 8px 0; font-size: 1.1em; }
+    .choose-text {
+      text-align: center;
+      font-size: 1.4em;
+      margin: 30px 0 20px;
+      color: #2c3e50;
+    }
     .tabs {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      background: #34495e;
-      margin-bottom: 20px;
+      gap: 15px;
+      margin-bottom: 30px;
     }
     .tab-button {
-      padding: 15px 25px;
+      padding: 25px 40px;
       background: #34495e;
       color: white;
       border: none;
-      font-size: 1.1em;
+      border-radius: 15px;
+      font-size: 1.6em;
       cursor: pointer;
+      min-width: 280px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .tab-button:hover {
+      transform: scale(1.05);
     }
     .tab-button.active {
       background: #27ae60;
+      box-shadow: 0 8px 16px rgba(39,174,96,0.4);
     }
     .tab-content {
       display: none;
       background: white;
       border-radius: 12px;
-      padding: 30px;
-      margin: 0 20px 20px;
+      padding: 40px;
+      margin: 0 20px 40px;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
@@ -60,53 +80,72 @@
       max-width: 100%;
       height: auto;
       border-radius: 8px;
-      margin: 15px 0;
+      margin: 20px 0;
       display: block;
     }
     .timer-area {
-      margin-top: 20px;
+      margin-top: 30px;
       text-align: center;
     }
     .timer-display {
-      font-size: 3.5em;
+      font-size: 4em;
       font-weight: bold;
       color: #e74c3c;
       margin: 20px 0;
     }
     .rest-timer-display {
-      font-size: 2.2em;
+      font-size: 2.5em;
       color: #3498db;
-      margin: 15px 0;
+      margin: 20px 0;
     }
     .count-display {
-      font-size: 2em;
-      margin: 15px 0;
+      font-size: 2.2em;
+      margin: 20px 0;
       color: #2c3e50;
     }
+    button.start-btn {
+      padding: 15px 40px;
+      font-size: 1.6em;
+      background: #27ae60;
+    }
+    button.stop-btn {
+      padding: 15px 40px;
+      font-size: 1.6em;
+      background: #c0392b;
+    }
     button {
-      padding: 12px 30px;
-      font-size: 1.3em;
-      margin: 10px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
       color: white;
+      margin: 10px;
     }
-    .start-btn { background: #27ae60; }
-    .stop-btn { background: #c0392b; }
-    .reset-all-btn { background: #7f8c8d; margin-top: 30px; }
   </style>
 </head>
 <body>
-  <div class="record-section">
-    <h2>今日記錄</h2>
-    <p id="today-record">今日尚未完成任何運動。</p>
-    <p id="yesterday-record">昨日記錄載入中...</p>
-    <button class="reset-all-btn" onclick="resetAll()">全部重設（包括今日記錄）</button>
+  <h1>每日運動時間表</h1>
+  <p style="text-align:center; color:#555; font-size:1.1em;">（等物理治療期間的家居練習，每日1-2次，每次10-20分鐘）</p>
+
+  <div class="section">
+    <h2>每日建議流程</h2>
+    <ul style="font-size:1.2em;">
+      <li>熱身：輕輕向前彎腰 + 深呼吸（5分鐘）</li>
+      <li>主要伸展：膝蓋抱胸、坐姿向前彎（5-10分鐘）</li>
+      <li>核心強化：改版臀橋（5-10分鐘）</li>
+      <li>注意：如果麻痹加劇，立即停 + 坐低向前靠</li>
+    </ul>
   </div>
 
+  <div class="record-section">
+    <h2>記錄</h2>
+    <p id="today-record" style="font-size:1.2em;">今日尚未完成任何運動。</p>
+    <p id="yesterday-record" style="font-size:1.2em;">昨日沒有記錄。</p>
+  </div>
+
+  <p class="choose-text">請點擊以下大按鈕選擇運動</p>
+
   <div class="tabs">
-    <button class="tab-button active" onclick="openTab('knee')">1. 膝蓋抱胸</button>
+    <button class="tab-button active" onclick="openTab('knee')">1. 膝蓋抱胸伸展</button>
     <button class="tab-button" onclick="openTab('seated')">2. 坐姿向前彎</button>
     <button class="tab-button" onclick="openTab('bridge')">3. 改版臀橋</button>
   </div>
@@ -114,7 +153,7 @@
   <!-- 膝蓋抱胸 -->
   <div id="knee" class="tab-content active">
     <h2 style="text-align:center;">膝蓋抱胸伸展</h2>
-    <p style="text-align:center; font-size:1.2em;">每邊保持約25秒，共5次</p>
+    <p style="text-align:center; font-size:1.3em;">每邊保持25秒，共5次</p>
     <img src="https://images.squarespace-cdn.com/content/v1/5f5e8592d2b0854b18af6975/cd839177-4fec-4260-aa52-b2994bd90a49/knee+to+chest+stretch.jpg?format=1000w" alt="膝蓋抱胸伸展">
     <img src="https://www.verywellhealth.com/thmb/v_FW5Djsqrg2EGKK0AWrFJrD9m0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-668296954-5e96103d62e04a08a0cfaaa039c2bf26.jpg" alt="膝蓋抱胸示範">
 
@@ -130,7 +169,7 @@
   <!-- 坐姿向前彎 -->
   <div id="seated" class="tab-content">
     <h2 style="text-align:center;">坐姿向前彎</h2>
-    <p style="text-align:center; font-size:1.2em;">保持約20秒，共5次</p>
+    <p style="text-align:center; font-size:1.3em;">保持20秒，共5次</p>
     <img src="https://i.ytimg.com/vi/PUVTGBARpoo/maxresdefault.jpg" alt="坐姿向前彎">
     <img src="https://cdn.shopify.com/s/files/1/0078/8715/9367/files/Yoga-Stretch-Seated-Forward-Bend.png?v=1637346396" alt="椅子向前彎">
 
@@ -146,7 +185,7 @@
   <!-- 改版臀橋 -->
   <div id="bridge" class="tab-content">
     <h2 style="text-align:center;">改版臀橋</h2>
-    <p style="text-align:center; font-size:1.2em;">抬約4秒，共8次</p>
+    <p style="text-align:center; font-size:1.3em;">抬4秒，共8次</p>
     <img src="https://www.shape.com/thmb/Ts05mjOzOAAJGxPxzbEtvkMRX7w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SHP_MTM_Glute-Bridge_3x2-bfe761cd0ffb45e28875198ebed77038.jpg" alt="臀橋">
     <img src="https://images.ctfassets.net/hjcv6wdwxsdz/7KMn9axHkdRmbkoejvkrwo/6699f5ad3ef63ef509cc49fdd43d2a19/bridge-claudia-hold__1_.png?w=1200" alt="改版臀橋">
 
@@ -160,9 +199,23 @@
   </div>
 
   <script>
-    // 音效
-    const holdEndSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // 運動結束聲（短促）
-    const restEndSound = new Audio('https://www.soundjay.com/buttons/beep-08b.mp3'); // 休息結束聲（較長）
+    // 內建蜂鳴聲（用 Web Audio API，唔使靠外部連結，永遠有效）
+    function playBeep(times = 1, freq = 700, dur = 150, interval = 350) {
+      for (let i = 0; i < times; i++) {
+        setTimeout(() => {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          osc.type = 'square';
+          osc.frequency.value = freq;
+          const gain = ctx.createGain();
+          gain.gain.value = 0.2; // 音量適中
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + dur / 1000);
+        }, i * interval);
+      }
+    }
 
     const intervals = {};
     const restIntervals = {};
@@ -173,6 +226,25 @@
       bridge: { hold: 4, rest: 30, totalReps: 8 }
     };
 
+    const exerciseNames = {
+      knee: '膝蓋抱胸伸展',
+      seated: '坐姿向前彎',
+      bridge: '改版臀橋'
+    };
+
+    let todayData = {};
+
+    function getTodayKey() {
+      const now = new Date();
+      return `exerciseRecord_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function getYesterdayKey() {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      return `exerciseRecord_${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+    }
+
     function openTab(id) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -181,6 +253,9 @@
     }
 
     function startCountdown(id) {
+      const remaining = parseInt(document.getElementById(`count-${id}`).textContent);
+      if (remaining <= 0) return;
+
       if (intervals[id]) return;
 
       let seconds = config[id].hold;
@@ -192,7 +267,7 @@
         if (seconds <= 0) {
           clearInterval(intervals[id]);
           delete intervals[id];
-          holdEndSound.play();
+          playBeep(1); // 運動結束：單聲 beep
           completeRep(id);
         }
       }, 1000);
@@ -200,15 +275,18 @@
 
     function completeRep(id) {
       let countElem = document.getElementById(`count-${id}`);
-      let count = parseInt(countElem.textContent);
-      if (count > 1) {
-        count--;
-        countElem.textContent = count;
-        startRestTimer(id);
-      } else {
-        countElem.textContent = 0;
-        recordCompletion(id);
-        document.getElementById(`timer-${id}`).textContent = '完成！';
+      let remaining = parseInt(countElem.textContent);
+      if (remaining > 0) {
+        remaining--;
+        countElem.textContent = remaining;
+        todayData[id] = (todayData[id] || 0) + 1;
+        localStorage.setItem(getTodayKey(), JSON.stringify(todayData));
+        updateRecords();
+        if (remaining > 0) {
+          startRestTimer(id);
+        } else {
+          document.getElementById(`timer-${id}`).textContent = '完成！';
+        }
       }
     }
 
@@ -222,7 +300,7 @@
         if (seconds <= 0) {
           clearInterval(restIntervals[id]);
           delete restIntervals[id];
-          restEndSound.play();
+          playBeep(2); // 休息結束：雙聲 beep
           document.getElementById(`rest-timer-${id}`).textContent = '休息結束！可以開始下一組';
         }
       }, 1000);
@@ -231,6 +309,7 @@
     function stopTimer(id) {
       if (intervals[id]) { clearInterval(intervals[id]); delete intervals[id]; }
       if (restIntervals[id]) { clearInterval(restIntervals[id]); delete restIntervals[id]; }
+      document.getElementById(`timer-${id}`).textContent = formatTime(config[id].hold);
       document.getElementById(`rest-timer-${id}`).textContent = `休息：${formatTime(config[id].rest)}`;
     }
 
@@ -240,71 +319,56 @@
       return `${m}:${s}`;
     }
 
-    // 記錄系統
-    const exerciseNames = {
-      knee: '膝蓋抱胸伸展',
-      seated: '坐姿向前彎',
-      bridge: '改版臀橋'
-    };
-
-    function getTodayKey() {
-      const now = new Date();
-      return `exerciseRecord_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    }
-
-    function getYesterdayKey() {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      return `exerciseRecord_${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-    }
-
-    function recordCompletion(id) {
-      let todayRecord = JSON.parse(localStorage.getItem(getTodayKey())) || [];
-      if (!todayRecord.includes(id)) {
-        todayRecord.push(id);
-        localStorage.setItem(getTodayKey(), JSON.stringify(todayRecord));
-      }
-      updateRecords();
-    }
-
     function updateRecords() {
-      const todayRecord = JSON.parse(localStorage.getItem(getTodayKey())) || [];
-      const yesterdayRecord = JSON.parse(localStorage.getItem(getYesterdayKey())) || [];
+      todayData = JSON.parse(localStorage.getItem(getTodayKey())) || {knee: 0, seated: 0, bridge: 0};
+      const yesterdayData = JSON.parse(localStorage.getItem(getYesterdayKey())) || null;
 
-      document.getElementById('today-record').textContent = todayRecord.length > 0
-        ? `今日已完成：${todayRecord.map(id => exerciseNames[id]).join('、')}`
-        : '今日尚未完成任何運動。';
-
-      document.getElementById('yesterday-record').textContent = yesterdayRecord.length > 0
-        ? `昨日完成：${yesterdayRecord.map(id => exerciseNames[id]).join('、')}`
-        : '昨日沒有記錄。';
-    }
-
-    function resetAll() {
-      if (confirm('確定要重設所有次數及今日記錄？')) {
-        localStorage.removeItem(getTodayKey());
-        ['knee', 'seated', 'bridge'].forEach(id => {
-          document.getElementById(`count-${id}`).textContent = config[id].totalReps;
-          document.getElementById(`timer-${id}`).textContent = formatTime(config[id].hold);
-          document.getElementById(`rest-timer-${id}`).textContent = `休息：${formatTime(config[id].rest)}`;
-          stopTimer(id);
-        });
-        updateRecords();
+      let sumToday = (todayData.knee || 0) + (todayData.seated || 0) + (todayData.bridge || 0);
+      let todayText;
+      if (sumToday === 0) {
+        todayText = '今日尚未完成任何運動。';
+      } else {
+        todayText = '今日完成：' +
+          `${exerciseNames.knee} ${(todayData.knee || 0)}/${config.knee.totalReps} 次， ` +
+          `${exerciseNames.seated} ${(todayData.seated || 0)}/${config.seated.totalReps} 次， ` +
+          `${exerciseNames.bridge} ${(todayData.bridge || 0)}/${config.bridge.totalReps} 次`;
       }
+      document.getElementById('today-record').textContent = todayText;
+
+      let yesterdayText = '昨日沒有記錄。';
+      if (yesterdayData) {
+        let sumYesterday = (yesterdayData.knee || 0) + (yesterdayData.seated || 0) + (yesterdayData.bridge || 0);
+        if (sumYesterday > 0) {
+          yesterdayText = '昨日完成：' +
+            `${exerciseNames.knee} ${(yesterdayData.knee || 0)}/${config.knee.totalReps} 次， ` +
+            `${exerciseNames.seated} ${(yesterdayData.seated || 0)}/${config.seated.totalReps} 次， ` +
+            `${exerciseNames.bridge} ${(yesterdayData.bridge || 0)}/${config.bridge.totalReps} 次`;
+        }
+      }
+      document.getElementById('yesterday-record').textContent = yesterdayText;
     }
 
     window.onload = function() {
+      todayData = JSON.parse(localStorage.getItem(getTodayKey())) || {knee: 0, seated: 0, bridge: 0};
+      ['knee', 'seated', 'bridge'].forEach(id => {
+        const done = todayData[id] || 0;
+        const remaining = Math.max(0, config[id].totalReps - done);
+        document.getElementById(`count-${id}`).textContent = remaining;
+        if (remaining === 0) {
+          document.getElementById(`timer-${id}`).textContent = '已完成！';
+        }
+      });
       updateRecords();
-      // 初始化顯示正確時間
-      document.getElementById('timer-knee').textContent = '00:25';
-      document.getElementById('timer-seated').textContent = '00:20';
-      document.getElementById('timer-bridge').textContent = '00:04';
+
+      // 初始化休息顯示
+      document.getElementById('rest-timer-knee').textContent = '休息：00:30';
+      document.getElementById('rest-timer-seated').textContent = '休息：00:30';
+      document.getElementById('rest-timer-bridge').textContent = '休息：00:30';
     };
   </script>
 
-  <footer style="text-align:center; margin:40px; color:#777;">
+  <footer style="text-align:center; margin:60px; color:#777; font-size:1.1em;">
     記住：如果不舒服就停，之後畀物理治療師睇。<br>
-    祝爸爸早日舒服啲！❤️
   </footer>
 </body>
 </html>
