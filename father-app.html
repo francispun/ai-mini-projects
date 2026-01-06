@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>每日運動時間表</title>
+  <title>每日運動時間表 - 脊椎保健版</title>
   <style>
     body {
       font-family: 'Microsoft JhengHei', 'Helvetica Neue', Arial, sans-serif;
@@ -30,6 +30,34 @@
       text-align: center;
       border-radius: 12px;
     }
+    .info-box {
+      background: #f1f8ff;
+      border-left: 5px solid #3498db;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      text-align: left;
+      font-size: 1.05em;
+    }
+    .info-box h3 {
+      margin-top: 0;
+      color: #2980b9;
+      font-size: 1.2em;
+    }
+    .warning-box {
+      background: #fff5f5;
+      border-left: 5px solid #e74c3c;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      text-align: left;
+      font-size: 1.05em;
+    }
+    .warning-box h3 {
+      margin-top: 0;
+      color: #c0392b;
+      font-size: 1.2em;
+    }
     .choose-text {
       text-align: center;
       font-size: 1.4em;
@@ -44,14 +72,14 @@
       margin-bottom: 30px;
     }
     .tab-button {
-      padding: 25px 40px;
+      padding: 20px 30px;
       background: #34495e;
       color: white;
       border: none;
       border-radius: 15px;
-      font-size: 1.6em;
+      font-size: 1.3em;
       cursor: pointer;
-      min-width: 280px;
+      min-width: 250px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.2);
       transition: transform 0.2s;
     }
@@ -66,11 +94,9 @@
       display: none;
       background: white;
       border-radius: 12px;
-      padding: 40px;
-      margin: 0 20px 40px;
+      padding: 30px;
+      margin: 0 auto 40px;
       max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .tab-content.active {
@@ -82,25 +108,29 @@
       border-radius: 8px;
       margin: 20px 0;
       display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
     .timer-area {
       margin-top: 30px;
       text-align: center;
+      border-top: 2px solid #eee;
+      padding-top: 20px;
     }
     .timer-display {
       font-size: 4em;
       font-weight: bold;
       color: #e74c3c;
-      margin: 20px 0;
+      margin: 10px 0;
     }
     .rest-timer-display {
-      font-size: 2.5em;
+      font-size: 2.2em;
       color: #3498db;
-      margin: 20px 0;
+      margin: 10px 0;
     }
     .count-display {
-      font-size: 2.2em;
-      margin: 20px 0;
+      font-size: 2em;
+      margin: 10px 0;
       color: #2c3e50;
     }
     button.start-btn {
@@ -120,35 +150,31 @@
       color: white;
       margin: 10px;
     }
-    .wake-note {
-      font-size: 1.1em;
-      color: #e67e22;
-      margin: 15px 0;
-      text-align: center;
-    }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; }
   </style>
 </head>
 <body>
   <h1>每日運動時間表</h1>
-  <p style="text-align:center; color:#555; font-size:1.1em;">（家居練習）</p>
+  <p style="text-align:center; color:#555; font-size:1.1em;">（家居練習 - 脊椎保健）</p>
 
   <div class="section">
     <h2>每日建議流程</h2>
     <ul style="font-size:1.2em;">
-      <li>熱身：輕輕向前彎腰 + 深呼吸（5分鐘）</li>
-      <li>主要伸展：膝蓋抱胸、坐姿向前彎（5-10分鐘）</li>
-      <li>核心強化：改版臀橋（5-10分鐘）</li>
-      <li>注意：如果麻痹加劇，立即停 + 坐低向前靠</li>
+      <li><strong>熱身：</strong>輕輕向前彎腰 + 深呼吸（5分鐘）</li>
+      <li><strong>主要伸展：</strong>膝蓋抱胸、坐姿向前彎（5-10分鐘）</li>
+      <li><strong>核心強化：</strong>改版臀橋（5-10分鐘）</li>
+      <li><strong>注意：</strong>如果麻痹加劇，立即停 + 坐低向前靠</li>
     </ul>
   </div>
 
   <div class="record-section">
-    <h2>記錄</h2>
+    <h2>今日進度記錄</h2>
     <p id="today-record" style="font-size:1.2em;">今日尚未完成任何運動。</p>
-    <p id="yesterday-record" style="font-size:1.2em;">昨日沒有記錄。</p>
+    <p id="yesterday-record" style="font-size:1.1em; color: #666;">昨日沒有記錄。</p>
   </div>
 
-  <p class="choose-text">請點擊以下大按鈕選擇運動</p>
+  <p class="choose-text">請選擇運動項目開始計時</p>
 
   <div class="tabs">
     <button class="tab-button active" onclick="openTab('knee')">1. 膝蓋抱胸伸展</button>
@@ -156,63 +182,120 @@
     <button class="tab-button" onclick="openTab('bridge')">3. 改版臀橋</button>
   </div>
 
-  <!-- 膝蓋抱胸 -->
+  <!-- 1. 膝蓋抱胸伸展 -->
   <div id="knee" class="tab-content active">
-    <h2 style="text-align:center;">膝蓋抱胸伸展</h2>
-    <p style="text-align:center; font-size:1.3em;">每邊保持25秒，共5次</p>
+    <h2 style="text-align:center; color:#2c3e50;">1. 膝蓋抱胸伸展 (Knee-to-Chest)</h2>
+    
+    <div class="info-box">
+      <h3>📝 動作描述</h3>
+      <p>仰臥在床上或瑜伽墊上，雙膝彎曲，腳平放。慢慢用雙手抱住一邊膝蓋，輕輕拉向胸口（另一隻腳保持彎曲或伸直均可）。保持姿勢20–30秒，感覺下背有輕微拉伸，然後慢慢放回。換邊重複。</p>
+      
+      <h3>🌟 好處</h3>
+      <p>打開腰椎後方空間，減輕神經壓迫，緩解腿部麻木/痛楚，增加下背靈活性。</p>
+    </div>
+
+    <div class="warning-box">
+      <h3>⚠️ 注意事項 / 禁忌</h3>
+      <ul>
+        <li>不要用力拉膝蓋超過舒適範圍，避免下背過度彎曲或痛。</li>
+        <li>如果有髖關節問題或近期手術，動作要更輕或避免。</li>
+        <li>保持頭部及肩膀貼地，不要抬頭。</li>
+        <li>呼吸要自然，不要憋氣。</li>
+        <li>如果拉到時有尖銳痛或腿麻突然加劇，立即停。</li>
+      </ul>
+    </div>
+
     <img src="https://images.squarespace-cdn.com/content/v1/5f5e8592d2b0854b18af6975/cd839177-4fec-4260-aa52-b2994bd90a49/knee+to+chest+stretch.jpg?format=1000w" alt="膝蓋抱胸伸展">
-    <img src="https://www.verywellhealth.com/thmb/v_FW5Djsqrg2EGKK0AWrFJrD9m0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-668296954-5e96103d62e04a08a0cfaaa039c2bf26.jpg" alt="膝蓋抱胸示範">
 
     <div class="timer-area">
+      <p style="font-size:1.3em; font-weight:bold;">目標：每邊 25 秒，共 5 次</p>
       <div class="count-display">剩餘次數： <span id="count-knee">5</span></div>
-      <button class="start-btn" onclick="startCountdown('knee')">開始</button>
+      <button class="start-btn" onclick="startCountdown('knee')">開始計時</button>
       <button class="stop-btn" onclick="stopTimer('knee')">停止</button>
       <div class="timer-display" id="timer-knee">00:25</div>
       <div class="rest-timer-display" id="rest-timer-knee">休息：00:30</div>
     </div>
   </div>
 
-  <!-- 坐姿向前彎 -->
+  <!-- 2. 坐姿向前彎 -->
   <div id="seated" class="tab-content">
-    <h2 style="text-align:center;">坐姿向前彎</h2>
-    <p style="text-align:center; font-size:1.3em;">保持20秒，共5次</p>
+    <h2 style="text-align:center; color:#2c3e50;">2. 坐姿向前彎 (Seated Forward Bend)</h2>
+
+    <div class="info-box">
+      <h3>📝 動作描述</h3>
+      <p>坐在穩陣的椅子上，雙腳平放地面，膝蓋約90度。慢慢向前彎腰，讓上身靠近大腿，手可伸向腳踝、腳背或地面（視靈活性）。保持背部放鬆（唔駝背），頭自然下垂。維持10–30秒，慢慢坐直。</p>
+      
+      <h3>🌟 好處</h3>
+      <p>快速打開脊椎通道，減輕站立/行走時的神經壓力，改善腿麻，特別適合「購物車徵象」患者。</p>
+    </div>
+
+    <div class="warning-box">
+      <h3>⚠️ 注意事項 / 禁忌</h3>
+      <ul>
+        <li>避免用力「拉」或彎得太深；只去到舒適位置。</li>
+        <li>不要彎曲背部（round the back），而是用髖部向前折疊。</li>
+        <li>如果有頸椎問題，保持頭部中性（不要低頭太猛）。</li>
+        <li>坐椅要有靠背支持，避免椅子太低或不穩。</li>
+        <li>若彎時感到下背尖痛或腿部電擊感，停下。</li>
+      </ul>
+    </div>
+
     <img src="https://i.ytimg.com/vi/PUVTGBARpoo/maxresdefault.jpg" alt="坐姿向前彎">
-    <img src="https://cdn.shopify.com/s/files/1/0078/8715/9367/files/Yoga-Stretch-Seated-Forward-Bend.png?v=1637346396" alt="椅子向前彎">
 
     <div class="timer-area">
+      <p style="font-size:1.3em; font-weight:bold;">目標：保持 20 秒，共 5 次</p>
       <div class="count-display">剩餘次數： <span id="count-seated">5</span></div>
-      <button class="start-btn" onclick="startCountdown('seated')">開始</button>
+      <button class="start-btn" onclick="startCountdown('seated')">開始計時</button>
       <button class="stop-btn" onclick="stopTimer('seated')">停止</button>
       <div class="timer-display" id="timer-seated">00:20</div>
       <div class="rest-timer-display" id="rest-timer-seated">休息：00:30</div>
     </div>
   </div>
 
-  <!-- 改版臀橋 -->
+  <!-- 3. 改版臀橋 -->
   <div id="bridge" class="tab-content">
-    <h2 style="text-align:center;">改版臀橋</h2>
-    <p style="text-align:center; font-size:1.3em;">抬4秒，共8次</p>
+    <h2 style="text-align:center; color:#2c3e50;">3. 改版臀橋 (Modified Glute Bridge)</h2>
+
+    <div class="info-box">
+      <h3>📝 動作描述</h3>
+      <p>仰臥，膝蓋彎曲，雙腳平放地面，與髖同寬。收緊臀部肌肉，輕輕抬起臀部幾厘米（唔使抬高，只離地少少），下背保持貼地或輕微自然曲線。保持3–5秒，慢慢放下。專注用臀部发力，而非下背。</p>
+      
+      <h3>🌟 好處</h3>
+      <p>強化臀部及核心肌肉，穩定脊椎，減少下背代償壓力，長期改善行走耐力。</p>
+    </div>
+
+    <div class="warning-box">
+      <h3>⚠️ 注意事項 / 禁忌</h3>
+      <ul>
+        <li><strong>千萬不要過度拱背（過度extension）</strong>，否則會收窄脊椎通道，加劇腿麻。</li>
+        <li>只抬到舒服位置（通常只離地5–10cm），感覺臀部收緊即可。</li>
+        <li>如果抬時下背痛或腿麻加劇，改為只做「骨盆傾斜」（pelvic tilt：輕輕壓平腰椎貼地，唔抬臀）。</li>
+        <li>呼吸：抬時呼氣，放時吸氣。</li>
+        <li>有嚴重骨質疏鬆或近期骨折者慎用。</li>
+      </ul>
+    </div>
+
     <img src="https://www.shape.com/thmb/Ts05mjOzOAAJGxPxzbEtvkMRX7w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SHP_MTM_Glute-Bridge_3x2-bfe761cd0ffb45e28875198ebed77038.jpg" alt="臀橋">
-    <img src="https://images.ctfassets.net/hjcv6wdwxsdz/7KMn9axHkdRmbkoejvkrwo/6699f5ad3ef63ef509cc49fdd43d2a19/bridge-claudia-hold__1_.png?w=1200" alt="改版臀橋">
 
     <div class="timer-area">
+      <p style="font-size:1.3em; font-weight:bold;">目標：抬起 4 秒，共 8 次</p>
       <div class="count-display">剩餘次數： <span id="count-bridge">8</span></div>
-      <button class="start-btn" onclick="startCountdown('bridge')">開始</button>
+      <button class="start-btn" onclick="startCountdown('bridge')">開始計時</button>
       <button class="stop-btn" onclick="stopTimer('bridge')">停止</button>
       <div class="timer-display" id="timer-bridge">00:04</div>
-      <div class="rest-timer-display" id="rest-timer-bridge">休息：00:30</div>
+      <div class="rest-timer-display" id="rest-timer-bridge">休息：00:10</div>
     </div>
   </div>
 
   <script>
-    // 全局 AudioContext 同 Wake Lock
     let audioCtx = null;
     let wakeLock = null;
 
     async function requestWakeLock() {
       try {
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('Wake Lock 已啟用');
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
       } catch (err) {
         console.log('Wake Lock 失敗: ' + err);
       }
@@ -220,10 +303,7 @@
 
     function releaseWakeLock() {
       if (wakeLock !== null) {
-        wakeLock.release().then(() => {
-          wakeLock = null;
-          console.log('Wake Lock 已釋放');
-        });
+        wakeLock.release().then(() => { wakeLock = null; });
       }
     }
 
@@ -238,18 +318,14 @@
 
     function playBeep(count = 1, freq = 800, duration = 0.15, interval = 0.4) {
       if (!audioCtx || audioCtx.state !== 'running') return;
-
       for (let i = 0; i < count; i++) {
         const osc = audioCtx.createOscillator();
         osc.type = 'square';
         osc.frequency.value = freq;
-
         const gain = audioCtx.createGain();
-        gain.gain.value = 0.3;
-
+        gain.gain.value = 0.2;
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         const startTime = audioCtx.currentTime + (i * interval);
         osc.start(startTime);
         osc.stop(startTime + duration);
@@ -292,17 +368,11 @@
     }
 
     async function startCountdown(id) {
-      // 解鎖音頻同 wake lock
       initAudio();
       await requestWakeLock();
 
       const remaining = parseInt(document.getElementById(`count-${id}`).textContent);
-      if (remaining <= 0) {
-        releaseWakeLock();
-        return;
-      }
-
-      if (intervals[id]) return;
+      if (remaining <= 0 || intervals[id]) return;
 
       let seconds = config[id].hold;
       document.getElementById(`timer-${id}`).textContent = formatTime(seconds);
@@ -313,7 +383,7 @@
         if (seconds <= 0) {
           clearInterval(intervals[id]);
           delete intervals[id];
-          playBeep(1, 900, 0.12);
+          playBeep(1, 900, 0.15);
           completeRep(id);
         }
       }, 1000);
@@ -347,8 +417,8 @@
         if (seconds <= 0) {
           clearInterval(restIntervals[id]);
           delete restIntervals[id];
-          playBeep(3, 600, 0.18, 0.35);
-          document.getElementById(`rest-timer-${id}`).textContent = '休息結束！可以開始下一組';
+          playBeep(3, 600, 0.2, 0.4);
+          document.getElementById(`rest-timer-${id}`).textContent = '休息結束！請開始下一組';
         }
       }, 1000);
     }
@@ -372,28 +442,14 @@
       const yesterdayData = JSON.parse(localStorage.getItem(getYesterdayKey())) || null;
 
       let sumToday = (todayData.knee || 0) + (todayData.seated || 0) + (todayData.bridge || 0);
-      let todayText;
-      if (sumToday === 0) {
-        todayText = '今日尚未完成任何運動。';
-      } else {
-        todayText = '今日完成：' +
-          `${exerciseNames.knee} ${(todayData.knee || 0)}/${config.knee.totalReps} 次， ` +
-          `${exerciseNames.seated} ${(todayData.seated || 0)}/${config.seated.totalReps} 次， ` +
-          `${exerciseNames.bridge} ${(todayData.bridge || 0)}/${config.bridge.totalReps} 次`;
-      }
+      let todayText = sumToday === 0 ? '今日尚未完成任何運動。' : 
+        `今日完成：膝蓋抱胸 ${(todayData.knee || 0)}/5, 坐姿前彎 ${(todayData.seated || 0)}/5, 臀橋 ${(todayData.bridge || 0)}/8`;
       document.getElementById('today-record').textContent = todayText;
 
-      let yesterdayText = '昨日沒有記錄。';
       if (yesterdayData) {
-        let sumYesterday = (yesterdayData.knee || 0) + (yesterdayData.seated || 0) + (yesterdayData.bridge || 0);
-        if (sumYesterday > 0) {
-          yesterdayText = '昨日完成：' +
-            `${exerciseNames.knee} ${(yesterdayData.knee || 0)}/${config.knee.totalReps} 次， ` +
-            `${exerciseNames.seated} ${(yesterdayData.seated || 0)}/${config.seated.totalReps} 次， ` +
-            `${exerciseNames.bridge} ${(yesterdayData.bridge || 0)}/${config.bridge.totalReps} 次`;
-        }
+        let yesterdayText = `昨日完成：膝蓋抱胸 ${(yesterdayData.knee || 0)}/5, 坐姿前彎 ${(yesterdayData.seated || 0)}/5, 臀橋 ${(yesterdayData.bridge || 0)}/8`;
+        document.getElementById('yesterday-record').textContent = yesterdayText;
       }
-      document.getElementById('yesterday-record').textContent = yesterdayText;
     }
 
     window.onload = function() {
@@ -402,20 +458,14 @@
         const done = todayData[id] || 0;
         const remaining = Math.max(0, config[id].totalReps - done);
         document.getElementById(`count-${id}`).textContent = remaining;
-        if (remaining === 0) {
-          document.getElementById(`timer-${id}`).textContent = '已完成！';
-        }
+        if (remaining === 0) document.getElementById(`timer-${id}`).textContent = '已完成！';
       });
       updateRecords();
-
-      document.getElementById('rest-timer-knee').textContent = '休息：00:30';
-      document.getElementById('rest-timer-seated').textContent = '休息：00:30';
-      document.getElementById('rest-timer-bridge').textContent = '休息：00:10';
     };
   </script>
 
-  <footer style="text-align:center; margin:60px; color:#777; font-size:1.1em;">
-    記住：如果不舒服就停，之後畀物理治療師睇。
+  <footer style="text-align:center; margin:60px 20px; color:#777; font-size:1.1em; border-top: 1px solid #ddd; padding-top: 20px;">
+    記住：運動期間如有任何不適或劇痛，請立即停止，並諮詢物理治療師或醫護人員。
   </footer>
 </body>
 </html>
