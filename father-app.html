@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>爸爸每日運動時間表</title>
+  <style>
+    body {
+      font-family: 'Microsoft JhengHei', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1, h2 { text-align: center; color: #2c3e50; }
+    .section { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 20px; 
+      margin: 20px auto; 
+      max-width: 800px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .exercise {
+      border-bottom: 1px solid #eee;
+      padding: 15px 0;
+    }
+    .exercise:last-child { border-bottom: none; }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: block;
+    }
+    .timer-area {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .timer-display {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #e74c3c;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.1em;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+    .start-btn { background: #27ae60; }
+    .stop-btn { background: #c0392b; }
+    .reset-btn { background: #3498db; }
+    .count-display {
+      font-size: 1.8em;
+      margin: 10px 0;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>爸爸每日運動時間表</h1>
+  <p style="text-align:center; color:#555;">（等物理治療期間的家居練習，每日1-2次，每次10-20分鐘）</p>
+
+  <div class="section">
+    <h2>每日建議流程</h2>
+    <ul>
+      <li>熱身：輕輕向前彎腰 + 深呼吸（5分鐘）</li>
+      <li>主要伸展：膝蓋抱胸、坐姿向前彎（5-10分鐘）</li>
+      <li>核心強化：改版臀橋（5-10分鐘）</li>
+      <li>有氧：固定單車或短距離行路（10-15分鐘）</li>
+      <li>注意：如果麻痹加劇，立即停 + 坐低向前靠</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>運動示範 + 計時/計數器</h2>
+
+    <!-- 膝蓋抱胸 -->
+    <div class="exercise">
+      <h3>1. 膝蓋抱胸伸展（每邊保持20-30秒，5-10次）</h3>
+      <img src="https://images.squarespace-cdn.com/content/v1/5f5e8592d2b0854b18af6975/cd839177-4fec-4260-aa52-b2994bd90a49/knee+to+chest+stretch.jpg?format=1000w" alt="膝蓋抱胸伸展">
+      <img src="https://www.verywellhealth.com/thmb/v_FW5Djsqrg2EGKK0AWrFJrD9m0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-668296954-5e96103d62e04a08a0cfaaa039c2bf26.jpg" alt="膝蓋抱胸示範">
+      
+      <div class="timer-area">
+        <div class="count-display">剩餘次數： <span id="count-knee">10</span></div>
+        <button class="start-btn" onclick="startTimer('knee')">開始計時</button>
+        <button class="stop-btn" onclick="stopTimer('knee')">停止</button>
+        <button class="reset-btn" onclick="resetCount('knee', 10)">重設次數</button>
+        <div class="timer-display" id="timer-knee">00:00</div>
+      </div>
+    </div>
+
+    <!-- 坐姿向前彎 -->
+    <div class="exercise">
+      <h3>2. 坐姿向前彎（保持10-30秒，5-10次）</h3>
+      <img src="https://i.ytimg.com/vi/PUVTGBARpoo/maxresdefault.jpg" alt="坐姿向前彎">
+      <img src="https://cdn.shopify.com/s/files/1/0078/8715/9367/files/Yoga-Stretch-Seated-Forward-Bend.png?v=1637346396" alt="椅子向前彎">
+      
+      <div class="timer-area">
+        <div class="count-display">剩餘次數： <span id="count-seated">10</span></div>
+        <button class="start-btn" onclick="startTimer('seated')">開始計時</button>
+        <button class="stop-btn" onclick="stopTimer('seated')">停止</button>
+        <button class="reset-btn" onclick="resetCount('seated', 10)">重設次數</button>
+        <div class="timer-display" id="timer-seated">00:00</div>
+      </div>
+    </div>
+
+    <!-- 改版臀橋 -->
+    <div class="exercise">
+      <h3>3. 改版臀橋（抬3-5秒，8-12次）</h3>
+      <img src="https://www.shape.com/thmb/Ts05mjOzOAAJGxPxzbEtvkMRX7w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SHP_MTM_Glute-Bridge_3x2-bfe761cd0ffb45e28875198ebed77038.jpg" alt="臀橋">
+      <img src="https://images.ctfassets.net/hjcv6wdwxsdz/7KMn9axHkdRmbkoejvkrwo/6699f5ad3ef63ef509cc49fdd43d2a19/bridge-claudia-hold__1_.png?w=1200" alt="改版臀橋">
+      
+      <div class="timer-area">
+        <div class="count-display">剩餘次數： <span id="count-bridge">10</span></div>
+        <button class="start-btn" onclick="startTimer('bridge')">開始計時</button>
+        <button class="stop-btn" onclick="stopTimer('bridge')">停止</button>
+        <button class="reset-btn" onclick="resetCount('bridge', 10)">重設次數</button>
+        <div class="timer-display" id="timer-bridge">00:00</div>
+      </div>
+    </div>
+
+    <!-- 購物車姿勢 -->
+    <div class="exercise">
+      <h3>4. 購物車姿勢行路（短距離練習）</h3>
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiZ5FcC_0mo01r5A1SE_aOkeq96OYWPsNt8kLpnbWBo-_gLAL3gnLjUgeR258tEhYc24Pn8ocDrp4vlHjT7c4hdJvPfVqRcCrs7dG9mbn49TdEWrRfCSyHZn1phGAdFv_fBCo7d20U97Vy0b0m3XZ3NtAjv54eawmZpq-KnvkDS7eduBn5EyMWHz-L8rEGf/s1000/shopping%20cart%20sign.jpg" alt="購物車姿勢">
+      
+      <div class="timer-area">
+        <button class="start-btn" onclick="startTimer('cart')">開始計時</button>
+        <button class="stop-btn" onclick="stopTimer('cart')">停止</button>
+        <div class="timer-display" id="timer-cart">00:00</div>
+      </div>
+    </div>
+
+    <!-- 固定單車 -->
+    <div class="exercise">
+      <h3>5. 固定單車（10-15分鐘）</h3>
+      <img src="https://thevervestudios.com/wp-content/uploads/2023/05/Verve-Studios%E2%80%94May-15th-2022%E2%80%94Sara-Ruth-Photography-6-scaled-e1682899498821-1024x771.jpg" alt="固定單車">
+      
+      <div class="timer-area">
+        <button class="start-btn" onclick="startTimer('bike')">開始計時</button>
+        <button class="stop-btn" onclick="stopTimer('bike')">停止</button>
+        <div class="timer-display" id="timer-bike">00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const timers = {};
+    const intervals = {};
+
+    function startTimer(id) {
+      if (timers[id]) return;
+      let seconds = 0;
+      timers[id] = seconds;
+      document.getElementById(`timer-${id}`).textContent = formatTime(seconds);
+
+      intervals[id] = setInterval(() => {
+        seconds++;
+        timers[id] = seconds;
+        document.getElementById(`timer-${id}`).textContent = formatTime(seconds);
+      }, 1000);
+    }
+
+    function stopTimer(id) {
+      if (intervals[id]) {
+        clearInterval(intervals[id]);
+        delete intervals[id];
+      }
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function resetCount(id, defaultCount) {
+      document.getElementById(`count-${id}`).textContent = defaultCount;
+    }
+
+    // 可加減次數（可自行擴充）
+  </script>
+
+  <footer style="text-align:center; margin-top:40px; color:#777;">
+    記住：如果不舒服就停，之後畀物理治療師睇。祝爸爸早日舒服啲！❤️
+  </footer>
+
+</body>
+</html>
