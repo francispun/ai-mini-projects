@@ -120,6 +120,12 @@
       color: white;
       margin: 10px;
     }
+    .wake-note {
+      font-size: 1.1em;
+      color: #e67e22;
+      margin: 15px 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -154,6 +160,7 @@
   <div id="knee" class="tab-content active">
     <h2 style="text-align:center;">膝蓋抱胸伸展</h2>
     <p style="text-align:center; font-size:1.3em;">每邊保持25秒，共5次</p>
+    <p class="wake-note">按「開始」後會保持螢幕亮住，避免計時停（做完會自動恢復）</p>
     <img src="https://images.squarespace-cdn.com/content/v1/5f5e8592d2b0854b18af6975/cd839177-4fec-4260-aa52-b2994bd90a49/knee+to+chest+stretch.jpg?format=1000w" alt="膝蓋抱胸伸展">
     <img src="https://www.verywellhealth.com/thmb/v_FW5Djsqrg2EGKK0AWrFJrD9m0=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-668296954-5e96103d62e04a08a0cfaaa039c2bf26.jpg" alt="膝蓋抱胸示範">
 
@@ -170,6 +177,7 @@
   <div id="seated" class="tab-content">
     <h2 style="text-align:center;">坐姿向前彎</h2>
     <p style="text-align:center; font-size:1.3em;">保持20秒，共5次</p>
+    <p class="wake-note">按「開始」後會保持螢幕亮住，避免計時停（做完會自動恢復）</p>
     <img src="https://i.ytimg.com/vi/PUVTGBARpoo/maxresdefault.jpg" alt="坐姿向前彎">
     <img src="https://cdn.shopify.com/s/files/1/0078/8715/9367/files/Yoga-Stretch-Seated-Forward-Bend.png?v=1637346396" alt="椅子向前彎">
 
@@ -186,6 +194,7 @@
   <div id="bridge" class="tab-content">
     <h2 style="text-align:center;">改版臀橋</h2>
     <p style="text-align:center; font-size:1.3em;">抬4秒，共8次</p>
+    <p class="wake-note">按「開始」後會保持螢幕亮住，避免計時停（做完會自動恢復）</p>
     <img src="https://www.shape.com/thmb/Ts05mjOzOAAJGxPxzbEtvkMRX7w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SHP_MTM_Glute-Bridge_3x2-bfe761cd0ffb45e28875198ebed77038.jpg" alt="臀橋">
     <img src="https://images.ctfassets.net/hjcv6wdwxsdz/7KMn9axHkdRmbkoejvkrwo/6699f5ad3ef63ef509cc49fdd43d2a19/bridge-claudia-hold__1_.png?w=1200" alt="改版臀橋">
 
@@ -199,21 +208,37 @@
   </div>
 
   <script>
-    // 全局 AudioContext（iPhone 必須這樣解鎖音頻）
+    // 全局 AudioContext 同 Wake Lock
     let audioCtx = null;
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock 已啟用');
+      } catch (err) {
+        console.log('Wake Lock 失敗: ' + err);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+          wakeLock = null;
+          console.log('Wake Lock 已釋放');
+        });
+      }
+    }
 
     function initAudio() {
       if (audioCtx === null) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
       if (audioCtx.state !== 'running') {
-        audioCtx.resume().then(() => {
-          console.log('音頻已解鎖');
-        });
+        audioCtx.resume();
       }
     }
 
-    // 播放蜂鳴聲（支援多個連續 beep，iPhone 友好）
     function playBeep(count = 1, freq = 800, duration = 0.15, interval = 0.4) {
       if (!audioCtx || audioCtx.state !== 'running') return;
 
@@ -269,12 +294,16 @@
       document.querySelector(`button[onclick="openTab('${id}')"]`).classList.add('active');
     }
 
-    function startCountdown(id) {
-      // 解鎖音頻（iPhone 必須在用戶點擊後才允許播放）
+    async function startCountdown(id) {
+      // 解鎖音頻同 wake lock
       initAudio();
+      await requestWakeLock();
 
       const remaining = parseInt(document.getElementById(`count-${id}`).textContent);
-      if (remaining <= 0) return;
+      if (remaining <= 0) {
+        releaseWakeLock();
+        return;
+      }
 
       if (intervals[id]) return;
 
@@ -287,7 +316,7 @@
         if (seconds <= 0) {
           clearInterval(intervals[id]);
           delete intervals[id];
-          playBeep(1, 900, 0.12); // 運動結束：單聲高頻短 beep
+          playBeep(1, 900, 0.12);
           completeRep(id);
         }
       }, 1000);
@@ -306,6 +335,7 @@
           startRestTimer(id);
         } else {
           document.getElementById(`timer-${id}`).textContent = '完成！';
+          releaseWakeLock();
         }
       }
     }
@@ -320,7 +350,7 @@
         if (seconds <= 0) {
           clearInterval(restIntervals[id]);
           delete restIntervals[id];
-          playBeep(3, 600, 0.18, 0.35); // 休息結束：三聲較低頻 beep（更容易區分，且 iPhone 更可靠）
+          playBeep(3, 600, 0.18, 0.35);
           document.getElementById(`rest-timer-${id}`).textContent = '休息結束！可以開始下一組';
         }
       }, 1000);
@@ -331,6 +361,7 @@
       if (restIntervals[id]) { clearInterval(restIntervals[id]); delete restIntervals[id]; }
       document.getElementById(`timer-${id}`).textContent = formatTime(config[id].hold);
       document.getElementById(`rest-timer-${id}`).textContent = `休息：${formatTime(config[id].rest)}`;
+      releaseWakeLock();
     }
 
     function formatTime(sec) {
@@ -380,7 +411,6 @@
       });
       updateRecords();
 
-      // 初始化休息顯示
       document.getElementById('rest-timer-knee').textContent = '休息：00:30';
       document.getElementById('rest-timer-seated').textContent = '休息：00:30';
       document.getElementById('rest-timer-bridge').textContent = '休息：00:10';
@@ -388,8 +418,7 @@
   </script>
 
   <footer style="text-align:center; margin:60px; color:#777; font-size:1.1em;">
-    記住：如果不舒服就停，之後畀物理治療師睇。<br>
-    祝爸爸早日舒服啲！❤️
+    記住：如果不舒服就停，之後畀物理治療師睇。
   </footer>
 </body>
 </html>
