@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tesla Valuation Play — Revenue & Margin Model</title>
+  <title>Tesla Forward Valuation Play — Margin & Growth Model</title>
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -65,7 +65,7 @@
   </div>
 
   <div class="control">
-    <label>Annual Margin Expansion Rate (%): <span id="marginGrowthVal">8</span>%</label>
+    <label>Annual Margin Expansion Rate (% pts/year): <span id="marginGrowthVal">8</span>%</label>
     <input type="range" id="marginGrowth" min="0" max="20" step="0.5" value="8"/>
   </div>
 
@@ -96,4 +96,58 @@
   <div class="result-line">Projected Revenue: <span id="revenueOut" class="highlight">$0 B</span></div>
   <div class="result-line">Projected Op. Margin: <span id="marginOut" class="highlight">0.0%</span></div>
   <div class="result-line">Operating Income: <span id="opIncOut" class="highlight">$0 B</span></div>
-  <div class="result-line">
+  <div class="result-line">Net Income (after tax): <span id="netIncOut" class="highlight">$0 B</span></div>
+  <div class="result-line">Diluted EPS: <span id="epsOut" class="highlight">$0.00</span></div>
+  <div class="result-line">Implied Forward P/E: <span id="peOut" class="highlight">N/A</span></div>
+</div>
+
+<script>
+  function updateCalculations() {
+    // Update all displayed slider values
+    document.getElementById('revStartVal').textContent = document.getElementById('revStart').value;
+    document.getElementById('growthVal').textContent = document.getElementById('growth').value;
+    document.getElementById('marginStartVal').textContent = document.getElementById('marginStart').value;
+    document.getElementById('marginGrowthVal').textContent = document.getElementById('marginGrowth').value;
+    document.getElementById('yearsVal').textContent = document.getElementById('years').value;
+    document.getElementById('taxVal').textContent = document.getElementById('tax').value;
+    document.getElementById('sharesVal').textContent = document.getElementById('shares').value;
+    document.getElementById('mcapVal').textContent = document.getElementById('mcap').value;
+
+    // Get values
+    const revStart = parseFloat(document.getElementById('revStart').value);
+    const growth = parseFloat(document.getElementById('growth').value) / 100;
+    const marginStart = parseFloat(document.getElementById('marginStart').value);
+    const marginExpansionAnnual = parseFloat(document.getElementById('marginGrowth').value);
+    const years = parseInt(document.getElementById('years').value);
+    const taxRate = parseFloat(document.getElementById('tax').value) / 100;
+    const shares = parseFloat(document.getElementById('shares').value);
+    const futureMcap = parseFloat(document.getElementById('mcap').value);
+
+    // Calculations
+    const revFinal = revStart * Math.pow(1 + growth, years);
+    const marginFinal = marginStart + marginExpansionAnnual * years;
+    const opIncFinal = revFinal * (marginFinal / 100);
+    const netIncFinal = opIncFinal * (1 - taxRate);
+    const eps = netIncFinal / shares;
+    const pe = netIncFinal > 0 ? (futureMcap * 1000) / netIncFinal : null;
+
+    // Update outputs
+    document.getElementById('yearsOut').textContent = years;
+    document.getElementById('revenueOut').textContent = '$' + revFinal.toFixed(1) + ' B';
+    document.getElementById('marginOut').textContent = marginFinal.toFixed(1) + '%';
+    document.getElementById('opIncOut').textContent = '$' + opIncFinal.toFixed(1) + ' B';
+    document.getElementById('netIncOut').textContent = '$' + netIncFinal.toFixed(1) + ' B';
+    document.getElementById('epsOut').textContent = '$' + eps.toFixed(2);
+    document.getElementById('peOut').textContent = pe !== null ? pe.toFixed(1) + 'x' : 'N/A';
+  }
+
+  // Attach to all sliders
+  const sliders = document.querySelectorAll('input[type="range"]');
+  sliders.forEach(slider => slider.addEventListener('input', updateCalculations));
+
+  // Initial calculation
+  updateCalculations();
+</script>
+
+</body>
+</html>
