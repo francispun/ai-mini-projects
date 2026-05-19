@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOR1 Family Inventory Helper (Family of 3)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h1 { color: #1e3a8a; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background: #e0f2fe; }
+    input { width: 100%; padding: 8px; box-sizing: border-box; }
+    button { padding: 8px 12px; margin: 3px; }
+    .add-btn { background: #22c55e; color: white; }
+    .generate-btn { background: #3b82f6; color: white; font-size: 16px; }
+    #output { margin-top: 20px; padding: 15px; background: white; border: 1px solid #ccc; white-space: pre-wrap; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>TOR1 Inventory Helper - Family of 3</h1>
+  <p><strong>Family:</strong> You + Wife + 3-year-old Son</p>
+
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Item / Group</th>
+        <th>Quantity / Details</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><input type="text" value="Adult Clothing (Men & Women)"></td><td><input type="text" value="12-15 boxes/bags"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Children's Clothing (3yo)"></td><td><input type="text" value="4-5 boxes/bags"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Shoes (Adults & Child)"></td><td><input type="text" value="25-30 pairs"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Bedding & Linen (Sheets, Duvets, Towels)"></td><td><input type="text" value="5-6 boxes"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Kitchenware, Crockery & Cutlery"></td><td><input type="text" value="~100 items total"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Pots, Pans & Cooking Utensils"></td><td><input type="text" value="25-30 items"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Small Kitchen Appliances"></td><td><input type="text" value="6-8 items (kettle, toaster, etc.)"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Furniture - Sofa"></td><td><input type="text" value="1"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Beds & Mattresses"></td><td><input type="text" value="2 (Double + Single)"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Wardrobes / Chest of Drawers"></td><td><input type="text" value="4"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Dining Table + Chairs"></td><td><input type="text" value="1 set"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="TV"></td><td><input type="text" value="1-2"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Laptops / Tablets"></td><td><input type="text" value="3"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Toys & Children's Items"></td><td><input type="text" value="4-5 boxes"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Books & Documents"></td><td><input type="text" value="~80-100 books + 2 boxes documents"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Stroller / Pushchair"></td><td><input type="text" value="1"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+      <tr><td><input type="text" value="Car Seat"></td><td><input type="text" value="1"></td><td><button onclick="deleteRow(this)">Delete</button></td></tr>
+    </tbody>
+  </table>
+
+  <button class="add-btn" onclick="addRow()">+ Add New Row</button>
+  <button class="generate-btn" onclick="generateList()">Generate TOR1 List</button>
+
+  <h2>Generated List (Copy & Paste into GOV.UK)</h2>
+  <div id="output"></div>
+
+  <script>
+    function addRow() {
+      const table = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+      const row = table.insertRow();
+      row.innerHTML = `
+        <td><input type="text" placeholder="e.g. Gaming Console"></td>
+        <td><input type="text" placeholder="e.g. 1"></td>
+        <td><button onclick="deleteRow(this)">Delete</button></td>
+      `;
+    }
+
+    function deleteRow(btn) {
+      btn.parentElement.parentElement.remove();
+    }
+
+    function generateList() {
+      const rows = document.querySelectorAll('#inventoryTable tbody tr');
+      let text = "TOR1 - Inventory List (Family of 3)\n";
+      text += "====================================\n\n";
+
+      rows.forEach(row => {
+        const item = row.cells[0].querySelector('input').value.trim();
+        const qty = row.cells[1].querySelector('input').value.trim();
+        if (item && qty) {
+          text += `• ${item} — ${qty}\n`;
+        }
+      });
+
+      document.getElementById('output').textContent = text;
+    }
+  </script>
+</body>
+</html>
