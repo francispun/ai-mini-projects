@@ -424,8 +424,11 @@
             setStatus("🎉 全部集齊！好叻呀！完成喇！", "ok");
             playSuccessSound();
             optBtns.forEach(b => b.disabled = true);
-            nextBtn.disabled = true;
-            nextBtn.style.opacity = "0.5";
+            // Change next button to Restart
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = "1";
+            nextLabel.textContent = "重新開始";
+            nextIcon.textContent = "🔄";
             // Show popup
             document.getElementById("congratsModal").classList.add("show");
           }, 400);
@@ -537,6 +540,8 @@
         candyBar.classList.add("show");
         nextLabel.textContent = "下一題";
         nextIcon.textContent = "▶️";
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = "1";
         speakLabel.textContent = "再聽一次";
         startChallengeRound();
       } else {
@@ -623,6 +628,12 @@
         numberDisplay.classList.remove("hidden");
         jyutpingDisplay.style.visibility = "visible";
         playSuccessSound();
+        // Auto go to next question (unless just finished)
+        if (candyCount < MAX_CANDY) {
+          setTimeout(() => {
+            if (mode === "challenge") startChallengeRound();
+          }, 1200);
+        }
       } else {
         // Wrong
         btn.classList.add("wrong");
@@ -678,6 +689,16 @@
     nextBtn.addEventListener("click", (e) => {
       e.preventDefault();
       if (mode === "challenge") {
+        // If finished (button says 重新開始), reset everything
+        if (nextLabel.textContent === "重新開始") {
+          candyCount = 0;
+          updateCandies();
+          nextLabel.textContent = "下一題";
+          nextIcon.textContent = "▶️";
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = "1";
+          setStatus("重新開始！加油！");
+        }
         startChallengeRound();
       } else {
         nextNumber();
