@@ -356,15 +356,10 @@
     nextBtn.addEventListener("click", (e) => {
       e.preventDefault();
       nextNumber();
-
-      // 順序模式：自動讀音；隨機模式（測驗）：唔自動讀
-      if (mode === "seq") {
-        setTimeout(() => {
-          speakNumber();
-        }, SPEAK_DELAY);
-      } else {
-        setStatus("睇清楚，然後撳「講出嚟」");
-      }
+      // 較長停頓先讀音
+      setTimeout(() => {
+        speakNumber();
+      }, SPEAK_DELAY);
     });
 
     // Voices
