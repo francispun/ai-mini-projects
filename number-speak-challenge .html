@@ -418,28 +418,51 @@
       setTimeout(() => speakNumber(currentNum), 400);
     }
 
+    // Simple celebration sound using Web Audio API
+    function playSuccessSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.12);
+          osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+        });
+      } catch (e) {
+        // ignore if audio context fails
+      }
+    }
+
     function checkAnswer(chosen, btn) {
       if (!waitingAnswer) return;
-      waitingAnswer = false;
-      optBtns.forEach(b => b.disabled = true);
 
       if (chosen === currentNum) {
+        // Correct!
+        waitingAnswer = false;
+        optBtns.forEach(b => b.disabled = true);
         btn.classList.add("correct");
         correctCount++;
         scoreEl.textContent = "答對：" + correctCount;
-        setStatus("✅ 正確！", "ok");
+        setStatus("✅ 正確！好叻呀！", "ok");
         numberDisplay.classList.remove("hidden");
         jyutpingDisplay.style.visibility = "visible";
+        playSuccessSound();
       } else {
+        // Wrong – second chance
         btn.classList.add("wrong");
-        optBtns.forEach(b => {
-          if (parseInt(b.textContent) === currentNum) {
-            b.classList.add("correct");
-          }
-        });
-        setStatus("❌ 錯咗，正確係 " + currentNum, "error");
-        numberDisplay.classList.remove("hidden");
-        jyutpingDisplay.style.visibility = "visible";
+        btn.disabled = true;
+        setStatus("❌ 唔啱，再聽一次再試！", "error");
+        // Replay the sound
+        setTimeout(() => {
+          speakNumber(currentNum);
+        }, 300);
       }
     }
 
