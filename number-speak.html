@@ -21,7 +21,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
       color: #fff;
       overflow: hidden;
     }
@@ -33,22 +33,54 @@
     }
 
     h1 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Mode switcher */
+    .mode-switch {
+      display: flex;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 4px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .mode-btn.active {
+      background: #fff;
+      color: #4f46e5;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .number-box {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 28px;
-      padding: 36px 20px;
-      margin-bottom: 28px;
+      padding: 32px 20px;
+      margin-bottom: 24px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.25);
     }
 
     .number {
-      font-size: 8.5rem;
+      font-size: 8rem;
       font-weight: 800;
       color: #4f46e5;
       line-height: 1;
@@ -61,9 +93,9 @@
     }
 
     .jyutping {
-      font-size: 1.35rem;
+      font-size: 1.3rem;
       color: #6b7280;
-      margin-top: 10px;
+      margin-top: 8px;
       font-weight: 500;
       letter-spacing: 1px;
     }
@@ -71,14 +103,14 @@
     .btn-group {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
-    button {
+    button.action {
       border: none;
       border-radius: 20px;
       padding: 18px 24px;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       cursor: pointer;
       transition: transform 0.15s ease, opacity 0.15s;
@@ -93,7 +125,7 @@
       touch-action: manipulation;
     }
 
-    button:active {
+    button.action:active {
       transform: scale(0.96);
       opacity: 0.9;
     }
@@ -107,11 +139,11 @@
     }
 
     .icon {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     .status {
-      margin-top: 18px;
+      margin-top: 16px;
       font-size: 0.95rem;
       min-height: 24px;
       opacity: 0.85;
@@ -124,11 +156,30 @@
     .status.ok {
       color: #bbf7d0;
     }
+
+    @media (max-height: 700px) {
+      .number {
+        font-size: 6.5rem;
+      }
+      .number-box {
+        padding: 24px 16px;
+      }
+      h1 {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>認數字 0–9</h1>
+
+    <!-- Mode Switch -->
+    <div class="mode-switch">
+      <button class="mode-btn active" id="modeSeq" type="button">順序</button>
+      <button class="mode-btn" id="modeRand" type="button">隨機</button>
+    </div>
 
     <div class="number-box">
       <div class="number" id="numberDisplay">0</div>
@@ -136,13 +187,13 @@
     </div>
 
     <div class="btn-group">
-      <button class="btn-speak" id="speakBtn" type="button">
+      <button class="action btn-speak" id="speakBtn" type="button">
         <span class="icon">🔊</span>
         <span>講出嚟</span>
       </button>
-      <button class="btn-next" id="nextBtn" type="button">
-        <span class="icon">🎲</span>
-        <span>換一個</span>
+      <button class="action btn-next" id="nextBtn" type="button">
+        <span class="icon">➡️</span>
+        <span id="nextLabel">下一個</span>
       </button>
     </div>
 
@@ -164,26 +215,21 @@
     };
 
     let currentNum = 0;
-    let voicesReady = false;
+    let mode = "seq"; // "seq" or "rand"
+    const SPEAK_DELAY = 750; // 數字出現後再讀音的延遲（毫秒）
 
     const numberDisplay = document.getElementById("numberDisplay");
     const jyutpingDisplay = document.getElementById("jyutpingDisplay");
     const speakBtn = document.getElementById("speakBtn");
     const nextBtn = document.getElementById("nextBtn");
+    const nextLabel = document.getElementById("nextLabel");
     const statusEl = document.getElementById("status");
+    const modeSeqBtn = document.getElementById("modeSeq");
+    const modeRandBtn = document.getElementById("modeRand");
 
     function setStatus(msg, type = "") {
       statusEl.textContent = msg;
       statusEl.className = "status" + (type ? " " + type : "");
-    }
-
-    function pickRandom() {
-      let newNum;
-      do {
-        newNum = Math.floor(Math.random() * 10);
-      } while (newNum === currentNum);
-      currentNum = newNum;
-      updateDisplay();
     }
 
     function updateDisplay() {
@@ -196,41 +242,48 @@
       numberDisplay.classList.add("pop");
     }
 
-    // iOS 需要先「unlock」語音
+    function nextNumber() {
+      if (mode === "seq") {
+        currentNum = (currentNum + 1) % 10;
+      } else {
+        let newNum;
+        do {
+          newNum = Math.floor(Math.random() * 10);
+        } while (newNum === currentNum);
+        currentNum = newNum;
+      }
+      updateDisplay();
+    }
+
+    // iOS unlock
     function unlockSpeech() {
       return new Promise((resolve) => {
         if (!window.speechSynthesis) {
           resolve(false);
           return;
         }
-        // 講一句空白 / 極短語音來解鎖
         const unlock = new SpeechSynthesisUtterance("");
         unlock.volume = 0;
         unlock.rate = 10;
         unlock.onend = () => resolve(true);
         unlock.onerror = () => resolve(true);
         window.speechSynthesis.speak(unlock);
-        // 保險 timeout
-        setTimeout(() => resolve(true), 300);
+        setTimeout(() => resolve(true), 250);
       });
     }
 
     function getBestVoice() {
       const voices = window.speechSynthesis.getVoices() || [];
-      // 優先順序
       const preferred = voices.find(v =>
         v.lang === "zh-HK" ||
         v.lang === "yue-HK" ||
-        v.lang === "zh-HK-x-lzh-local" ||
         (v.name && /cantonese|yue|香港|hk/i.test(v.name))
       );
       if (preferred) return preferred;
 
-      // 其次普通話
-      const mandarin = voices.find(v =>
+      return voices.find(v =>
         v.lang === "zh-CN" || v.lang === "zh-TW" || v.lang.startsWith("zh")
-      );
-      return mandarin || null;
+      ) || null;
     }
 
     async function speakNumber() {
@@ -239,10 +292,8 @@
         return;
       }
 
-      // 停止之前
       window.speechSynthesis.cancel();
 
-      // iOS 有時需要 resume
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
       }
@@ -269,45 +320,57 @@
         setStatus("撳「講出嚟」再聽一次");
       };
 
-      utterance.onerror = (e) => {
-        console.error("Speech error:", e);
+      utterance.onerror = () => {
         setStatus("語音出錯，再試一次", "error");
       };
 
-      // 再解鎖一次（特別係 iOS）
       await unlockSpeech();
       window.speechSynthesis.speak(utterance);
     }
 
-    // 載入 voices
-    function loadVoices() {
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        voicesReady = true;
+    // Mode switching
+    function setMode(newMode) {
+      mode = newMode;
+      if (mode === "seq") {
+        modeSeqBtn.classList.add("active");
+        modeRandBtn.classList.remove("active");
+        nextLabel.textContent = "下一個";
+        nextBtn.querySelector(".icon").textContent = "➡️";
+      } else {
+        modeRandBtn.classList.add("active");
+        modeSeqBtn.classList.remove("active");
+        nextLabel.textContent = "換一個";
+        nextBtn.querySelector(".icon").textContent = "🎲";
       }
     }
 
-    if (window.speechSynthesis) {
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
+    modeSeqBtn.addEventListener("click", () => setMode("seq"));
+    modeRandBtn.addEventListener("click", () => setMode("rand"));
 
-    // 按鈕事件（用 pointerup 更穩陣）
-    speakBtn.addEventListener("click", function (e) {
+    // Buttons
+    speakBtn.addEventListener("click", (e) => {
       e.preventDefault();
       speakNumber();
     });
 
-    nextBtn.addEventListener("click", function (e) {
+    nextBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      pickRandom();
-      // 換完稍停再講
+      nextNumber();
+      // 較長停頓先讀音
       setTimeout(() => {
         speakNumber();
-      }, 350);
+      }, SPEAK_DELAY);
     });
 
-    // 初始
+    // Voices
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    // Init
     updateDisplay();
     setStatus("撳「講出嚟」聽廣東話");
   </script>
