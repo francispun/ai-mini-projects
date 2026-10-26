@@ -44,7 +44,7 @@
       background: rgba(255,255,255,0.18);
       border-radius: 14px;
       padding: 3px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       gap: 3px;
     }
 
@@ -68,13 +68,50 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.15);
     }
 
+    /* Candy bar */
+    .candy-bar {
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      min-height: 42px;
+      align-items: center;
+    }
+
+    .candy-bar.show {
+      display: flex;
+    }
+
+    .candy {
+      font-size: 2rem;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      opacity: 0.25;
+      filter: grayscale(1);
+    }
+
+    .candy.filled {
+      opacity: 1;
+      filter: none;
+      transform: scale(1.15);
+    }
+
+    .candy.pop {
+      animation: candyPop 0.45s ease;
+    }
+
+    @keyframes candyPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.5); }
+      100% { transform: scale(1.15); }
+    }
+
     .number-box {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 24px;
       padding: 28px 16px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       box-shadow: 0 16px 32px rgba(0,0,0,0.22);
-      min-height: 160px;
+      min-height: 150px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -82,7 +119,7 @@
     }
 
     .number {
-      font-size: 7.2rem;
+      font-size: 7rem;
       font-weight: 800;
       color: #4f46e5;
       line-height: 1;
@@ -108,7 +145,7 @@
     .options {
       display: none;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .options.show {
@@ -120,9 +157,9 @@
       border: none;
       background: #fff;
       color: #4f46e5;
-      font-size: 2.6rem;
+      font-size: 2.5rem;
       font-weight: 800;
-      padding: 22px 8px;
+      padding: 20px 8px;
       border-radius: 18px;
       cursor: pointer;
       box-shadow: 0 8px 18px rgba(0,0,0,0.18);
@@ -158,8 +195,8 @@
     button.action {
       border: none;
       border-radius: 18px;
-      padding: 16px 20px;
-      font-size: 1.2rem;
+      padding: 15px 20px;
+      font-size: 1.15rem;
       font-weight: 700;
       cursor: pointer;
       transition: transform 0.15s, opacity 0.15s;
@@ -187,22 +224,80 @@
 
     .status {
       margin-top: 14px;
-      font-size: 0.95rem;
-      min-height: 22px;
-      opacity: 0.9;
+      font-size: 1rem;
+      min-height: 24px;
+      opacity: 0.95;
     }
 
     .status.ok { color: #bbf7d0; }
     .status.error { color: #fecaca; }
     .status.big { font-size: 1.15rem; font-weight: 600; }
 
-    .score {
-      margin-top: 8px;
-      font-size: 0.9rem;
-      opacity: 0.8;
+    .hide { display: none !important; }
+
+    /* Congrats modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
     }
 
-    .hide { display: none !important; }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px 28px;
+      max-width: 320px;
+      width: 88%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transform: scale(0.85);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-emoji {
+      font-size: 4rem;
+      margin-bottom: 12px;
+    }
+
+    .modal h2 {
+      color: #4f46e5;
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+    }
+
+    .modal button {
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(34,197,94,0.35);
+    }
   </style>
 </head>
 <body>
@@ -213,6 +308,15 @@
       <button class="mode-btn active" data-mode="seq" type="button">順序</button>
       <button class="mode-btn" data-mode="rand" type="button">隨機</button>
       <button class="mode-btn" data-mode="challenge" type="button">挑戰</button>
+    </div>
+
+    <!-- 5 candies -->
+    <div class="candy-bar" id="candyBar">
+      <span class="candy" data-i="0">🍬</span>
+      <span class="candy" data-i="1">🍬</span>
+      <span class="candy" data-i="2">🍬</span>
+      <span class="candy" data-i="3">🍬</span>
+      <span class="candy" data-i="4">🍬</span>
     </div>
 
     <div class="number-box" id="numberBox">
@@ -238,7 +342,16 @@
     </div>
 
     <div class="status" id="status">撳「講出嚟」聽廣東話</div>
-    <div class="score hide" id="score">答對：0</div>
+  </div>
+
+  <!-- Congrats Modal -->
+  <div class="modal-overlay" id="congratsModal">
+    <div class="modal">
+      <div class="modal-emoji">🎉🍬🎉</div>
+      <h2>全部集齊！</h2>
+      <p>好叻呀！完成喇！</p>
+      <button id="modalCloseBtn" type="button">太棒了！</button>
+    </div>
   </div>
 
   <script>
@@ -257,20 +370,23 @@
 
     let currentNum = 0;
     let mode = "seq";
-    let correctCount = 0;
+    let candyCount = 0;          // 0 ~ 5
     let waitingAnswer = false;
+    let wrongOnce = false;       // already used the second chance
     const SPEAK_DELAY = 700;
+    const MAX_CANDY = 5;
 
     const numberDisplay = document.getElementById("numberDisplay");
     const jyutpingDisplay = document.getElementById("jyutpingDisplay");
     const optionsEl = document.getElementById("options");
+    const candyBar = document.getElementById("candyBar");
     const speakBtn = document.getElementById("speakBtn");
     const nextBtn = document.getElementById("nextBtn");
     const speakLabel = document.getElementById("speakLabel");
     const nextLabel = document.getElementById("nextLabel");
     const nextIcon = document.getElementById("nextIcon");
     const statusEl = document.getElementById("status");
-    const scoreEl = document.getElementById("score");
+    const candyEls = document.querySelectorAll(".candy");
     const optBtns = [
       document.getElementById("opt0"),
       document.getElementById("opt1"),
@@ -280,6 +396,50 @@
     function setStatus(msg, type = "") {
       statusEl.textContent = msg;
       statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function updateCandies(animateIndex = -1) {
+      candyEls.forEach((el, i) => {
+        el.classList.remove("pop");
+        if (i < candyCount) {
+          el.classList.add("filled");
+          if (i === animateIndex) {
+            // trigger pop
+            void el.offsetWidth;
+            el.classList.add("pop");
+          }
+        } else {
+          el.classList.remove("filled");
+        }
+      });
+    }
+
+    function addCandy() {
+      if (candyCount < MAX_CANDY) {
+        candyCount++;
+        updateCandies(candyCount - 1);
+        if (candyCount >= MAX_CANDY) {
+          // Finished!
+          setTimeout(() => {
+            setStatus("🎉 全部集齊！好叻呀！完成喇！", "ok");
+            playSuccessSound();
+            optBtns.forEach(b => b.disabled = true);
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = "0.5";
+            // Show popup
+            document.getElementById("congratsModal").classList.add("show");
+          }, 400);
+        }
+      } else {
+        updateCandies();
+      }
+    }
+
+    function loseCandy() {
+      if (candyCount > 0) {
+        candyCount--;
+        updateCandies();
+      }
     }
 
     function updateDisplay(showNumber = true) {
@@ -363,39 +523,43 @@
     function setMode(newMode) {
       mode = newMode;
       waitingAnswer = false;
+      wrongOnce = false;
+
       document.querySelectorAll(".mode-btn").forEach(b => {
         b.classList.toggle("active", b.dataset.mode === mode);
       });
 
       optionsEl.classList.remove("show");
-      scoreEl.classList.add("hide");
       speakBtn.classList.remove("hide");
       nextBtn.classList.remove("hide");
 
-      if (mode === "seq") {
-        nextLabel.textContent = "下一個";
-        nextIcon.textContent = "➡️";
-        speakLabel.textContent = "講出嚟";
-        updateDisplay(true);
-        setStatus("順序模式：自動讀音");
-      } else if (mode === "rand") {
-        nextLabel.textContent = "換一個";
-        nextIcon.textContent = "🎲";
-        speakLabel.textContent = "講出嚟";
-        updateDisplay(true);
-        setStatus("隨機模式：自己撳先讀");
-      } else {
+      if (mode === "challenge") {
+        candyBar.classList.add("show");
         nextLabel.textContent = "下一題";
         nextIcon.textContent = "▶️";
         speakLabel.textContent = "再聽一次";
-        scoreEl.classList.remove("hide");
-        scoreEl.textContent = "答對：" + correctCount;
         startChallengeRound();
+      } else {
+        candyBar.classList.remove("show");
+        if (mode === "seq") {
+          nextLabel.textContent = "下一個";
+          nextIcon.textContent = "➡️";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("順序模式：自動讀音");
+        } else {
+          nextLabel.textContent = "換一個";
+          nextIcon.textContent = "🎲";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("隨機模式：自己撳先讀");
+        }
       }
     }
 
     function startChallengeRound() {
       waitingAnswer = true;
+      wrongOnce = false;
       currentNum = Math.floor(Math.random() * 10);
       updateDisplay(false);
 
@@ -418,51 +582,72 @@
       setTimeout(() => speakNumber(currentNum), 400);
     }
 
-    // Simple celebration sound using Web Audio API
     function playSuccessSound() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
-        notes.forEach((freq, i) => {
+        const notes = [
+          { freq: 523.25, start: 0.00, dur: 0.12 },
+          { freq: 659.25, start: 0.10, dur: 0.12 },
+          { freq: 783.99, start: 0.20, dur: 0.12 },
+          { freq: 1046.5, start: 0.30, dur: 0.25 },
+          { freq: 1318.5, start: 0.42, dur: 0.18 },
+          { freq: 1568.0, start: 0.52, dur: 0.22 }
+        ];
+        notes.forEach(note => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.value = freq;
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.3);
+          osc.type = "triangle";
+          osc.frequency.value = note.freq;
+          const t = ctx.currentTime + note.start;
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.4, t + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + note.dur);
           osc.connect(gain);
           gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + i * 0.12);
-          osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+          osc.start(t);
+          osc.stop(t + note.dur + 0.03);
         });
-      } catch (e) {
-        // ignore if audio context fails
-      }
+      } catch (e) {}
     }
 
     function checkAnswer(chosen, btn) {
       if (!waitingAnswer) return;
 
       if (chosen === currentNum) {
-        // Correct!
+        // Correct
         waitingAnswer = false;
         optBtns.forEach(b => b.disabled = true);
         btn.classList.add("correct");
-        correctCount++;
-        scoreEl.textContent = "答對：" + correctCount;
-        setStatus("✅ 正確！好叻呀！", "ok");
+        addCandy();
+        setStatus("✅ 正確！得到一粒糖！", "ok");
         numberDisplay.classList.remove("hidden");
         jyutpingDisplay.style.visibility = "visible";
         playSuccessSound();
       } else {
-        // Wrong – second chance
+        // Wrong
         btn.classList.add("wrong");
         btn.disabled = true;
-        setStatus("❌ 唔啱，再聽一次再試！", "error");
-        // Replay the sound
-        setTimeout(() => {
-          speakNumber(currentNum);
-        }, 300);
+
+        if (!wrongOnce) {
+          // First wrong → second chance
+          wrongOnce = true;
+          setStatus("❌ 唔啱，再聽一次再試！", "error");
+          setTimeout(() => speakNumber(currentNum), 300);
+        } else {
+          // Second wrong → lose one candy
+          waitingAnswer = false;
+          optBtns.forEach(b => b.disabled = true);
+          // highlight correct
+          optBtns.forEach(b => {
+            if (parseInt(b.textContent) === currentNum) {
+              b.classList.add("correct");
+            }
+          });
+          loseCandy();
+          setStatus("唔緊要，少咗一粒糖", "error");
+          numberDisplay.classList.remove("hidden");
+          jyutpingDisplay.style.visibility = "visible";
+        }
       }
     }
 
@@ -509,7 +694,18 @@
       speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
     }
 
+    // Close congrats modal
+    document.getElementById("modalCloseBtn").addEventListener("click", () => {
+      document.getElementById("congratsModal").classList.remove("show");
+    });
+    document.getElementById("congratsModal").addEventListener("click", (e) => {
+      if (e.target.id === "congratsModal") {
+        document.getElementById("congratsModal").classList.remove("show");
+      }
+    });
+
     updateDisplay(true);
+    updateCandies();
     setStatus("撳「講出嚟」聽廣東話");
   </script>
 </body>
