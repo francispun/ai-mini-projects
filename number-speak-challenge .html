@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>認數字 0-9</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .mode-switch {
+      display: flex;
+      background: rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 3px;
+      margin-bottom: 16px;
+      gap: 3px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 4px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .mode-btn.active {
+      background: #fff;
+      color: #4f46e5;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+
+    .number-box {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 28px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.22);
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number {
+      font-size: 7.2rem;
+      font-weight: 800;
+      color: #4f46e5;
+      line-height: 1;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+    }
+
+    .number.pop {
+      transform: scale(1.1);
+    }
+
+    .number.hidden {
+      visibility: hidden;
+    }
+
+    .jyutping {
+      font-size: 1.2rem;
+      color: #6b7280;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .options {
+      display: none;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .options.show {
+      display: flex;
+    }
+
+    .option-btn {
+      flex: 1;
+      border: none;
+      background: #fff;
+      color: #4f46e5;
+      font-size: 2.6rem;
+      font-weight: 800;
+      padding: 22px 8px;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      transition: transform 0.15s, background 0.2s;
+      touch-action: manipulation;
+    }
+
+    .option-btn:active {
+      transform: scale(0.95);
+    }
+
+    .option-btn.correct {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .option-btn.wrong {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .option-btn:disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button.action {
+      border: none;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      box-shadow: 0 7px 18px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #fff;
+      touch-action: manipulation;
+    }
+
+    button.action:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+
+    .btn-speak {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    .status {
+      margin-top: 14px;
+      font-size: 0.95rem;
+      min-height: 22px;
+      opacity: 0.9;
+    }
+
+    .status.ok { color: #bbf7d0; }
+    .status.error { color: #fecaca; }
+    .status.big { font-size: 1.15rem; font-weight: 600; }
+
+    .score {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>認數字 0–9</h1>
+
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="seq" type="button">順序</button>
+      <button class="mode-btn" data-mode="rand" type="button">隨機</button>
+      <button class="mode-btn" data-mode="challenge" type="button">挑戰</button>
+    </div>
+
+    <div class="number-box" id="numberBox">
+      <div class="number" id="numberDisplay">0</div>
+      <div class="jyutping" id="jyutpingDisplay">ling4</div>
+    </div>
+
+    <div class="options" id="options">
+      <button class="option-btn" id="opt0" type="button">0</button>
+      <button class="option-btn" id="opt1" type="button">1</button>
+      <button class="option-btn" id="opt2" type="button">2</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="action btn-speak" id="speakBtn" type="button">
+        <span>🔊</span>
+        <span id="speakLabel">講出嚟</span>
+      </button>
+      <button class="action btn-next" id="nextBtn" type="button">
+        <span id="nextIcon">➡️</span>
+        <span id="nextLabel">下一個</span>
+      </button>
+    </div>
+
+    <div class="status" id="status">撳「講出嚟」聽廣東話</div>
+    <div class="score hide" id="score">答對：0</div>
+  </div>
+
+  <script>
+    const numbers = {
+      0: { jyutping: "ling4", text: "零" },
+      1: { jyutping: "jat1", text: "一" },
+      2: { jyutping: "ji6",  text: "二" },
+      3: { jyutping: "saam1", text: "三" },
+      4: { jyutping: "sei3",  text: "四" },
+      5: { jyutping: "ng5",   text: "五" },
+      6: { jyutping: "luk6",  text: "六" },
+      7: { jyutping: "cat1",  text: "七" },
+      8: { jyutping: "baat3", text: "八" },
+      9: { jyutping: "gau2",  text: "九" }
+    };
+
+    let currentNum = 0;
+    let mode = "seq";
+    let correctCount = 0;
+    let waitingAnswer = false;
+    const SPEAK_DELAY = 700;
+
+    const numberDisplay = document.getElementById("numberDisplay");
+    const jyutpingDisplay = document.getElementById("jyutpingDisplay");
+    const optionsEl = document.getElementById("options");
+    const speakBtn = document.getElementById("speakBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const speakLabel = document.getElementById("speakLabel");
+    const nextLabel = document.getElementById("nextLabel");
+    const nextIcon = document.getElementById("nextIcon");
+    const statusEl = document.getElementById("status");
+    const scoreEl = document.getElementById("score");
+    const optBtns = [
+      document.getElementById("opt0"),
+      document.getElementById("opt1"),
+      document.getElementById("opt2")
+    ];
+
+    function setStatus(msg, type = "") {
+      statusEl.textContent = msg;
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function updateDisplay(showNumber = true) {
+      const info = numbers[currentNum];
+      numberDisplay.textContent = currentNum;
+      jyutpingDisplay.textContent = info.jyutping;
+
+      if (showNumber) {
+        numberDisplay.classList.remove("hidden");
+        jyutpingDisplay.style.visibility = "visible";
+      } else {
+        numberDisplay.classList.add("hidden");
+        jyutpingDisplay.style.visibility = "hidden";
+      }
+
+      numberDisplay.classList.remove("pop");
+      void numberDisplay.offsetWidth;
+      numberDisplay.classList.add("pop");
+    }
+
+    function unlockSpeech() {
+      return new Promise(resolve => {
+        if (!window.speechSynthesis) return resolve(false);
+        try {
+          const u = new SpeechSynthesisUtterance(" ");
+          u.volume = 0.01;
+          u.rate = 2;
+          u.onend = u.onerror = () => resolve(true);
+          speechSynthesis.speak(u);
+          setTimeout(() => resolve(true), 200);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    function getVoice() {
+      const voices = speechSynthesis.getVoices() || [];
+      return (
+        voices.find(v => v.lang === "zh-HK" || v.lang === "yue-HK") ||
+        voices.find(v => /cantonese|yue|香港|hk/i.test(v.name || "")) ||
+        voices.find(v => v.lang.startsWith("zh")) ||
+        null
+      );
+    }
+
+    async function speakNumber(num = currentNum) {
+      if (!window.speechSynthesis) {
+        setStatus("呢部電話唔支援語音", "error");
+        return;
+      }
+
+      speechSynthesis.cancel();
+      if (speechSynthesis.paused) speechSynthesis.resume();
+
+      const info = numbers[num];
+      const u = new SpeechSynthesisUtterance(info.text);
+      u.lang = "zh-HK";
+      u.rate = 0.82;
+      u.pitch = 1;
+      u.volume = 1;
+
+      const voice = getVoice();
+      if (voice) {
+        u.voice = voice;
+        u.lang = voice.lang;
+      }
+
+      u.onstart = () => setStatus("講緊：「" + info.text + "」", "ok");
+      u.onend = () => {
+        if (mode !== "challenge" || !waitingAnswer) {
+          setStatus("撳「講出嚟」再聽一次");
+        }
+      };
+      u.onerror = () => setStatus("語音失敗，再試一次", "error");
+
+      await unlockSpeech();
+      speechSynthesis.speak(u);
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      waitingAnswer = false;
+      document.querySelectorAll(".mode-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.mode === mode);
+      });
+
+      optionsEl.classList.remove("show");
+      scoreEl.classList.add("hide");
+      speakBtn.classList.remove("hide");
+      nextBtn.classList.remove("hide");
+
+      if (mode === "seq") {
+        nextLabel.textContent = "下一個";
+        nextIcon.textContent = "➡️";
+        speakLabel.textContent = "講出嚟";
+        updateDisplay(true);
+        setStatus("順序模式：自動讀音");
+      } else if (mode === "rand") {
+        nextLabel.textContent = "換一個";
+        nextIcon.textContent = "🎲";
+        speakLabel.textContent = "講出嚟";
+        updateDisplay(true);
+        setStatus("隨機模式：自己撳先讀");
+      } else {
+        nextLabel.textContent = "下一題";
+        nextIcon.textContent = "▶️";
+        speakLabel.textContent = "再聽一次";
+        scoreEl.classList.remove("hide");
+        scoreEl.textContent = "答對：" + correctCount;
+        startChallengeRound();
+      }
+    }
+
+    function startChallengeRound() {
+      waitingAnswer = true;
+      currentNum = Math.floor(Math.random() * 10);
+      updateDisplay(false);
+
+      let opts = [currentNum];
+      while (opts.length < 3) {
+        const n = Math.floor(Math.random() * 10);
+        if (!opts.includes(n)) opts.push(n);
+      }
+      opts = opts.sort(() => Math.random() - 0.5);
+
+      optBtns.forEach((btn, i) => {
+        btn.textContent = opts[i];
+        btn.disabled = false;
+        btn.classList.remove("correct", "wrong");
+        btn.onclick = () => checkAnswer(opts[i], btn);
+      });
+
+      optionsEl.classList.add("show");
+      setStatus("聽完聲音，揀正確數字", "big");
+      setTimeout(() => speakNumber(currentNum), 400);
+    }
+
+    function checkAnswer(chosen, btn) {
+      if (!waitingAnswer) return;
+      waitingAnswer = false;
+      optBtns.forEach(b => b.disabled = true);
+
+      if (chosen === currentNum) {
+        btn.classList.add("correct");
+        correctCount++;
+        scoreEl.textContent = "答對：" + correctCount;
+        setStatus("✅ 正確！", "ok");
+        numberDisplay.classList.remove("hidden");
+        jyutpingDisplay.style.visibility = "visible";
+      } else {
+        btn.classList.add("wrong");
+        optBtns.forEach(b => {
+          if (parseInt(b.textContent) === currentNum) {
+            b.classList.add("correct");
+          }
+        });
+        setStatus("❌ 錯咗，正確係 " + currentNum, "error");
+        numberDisplay.classList.remove("hidden");
+        jyutpingDisplay.style.visibility = "visible";
+      }
+    }
+
+    function nextNumber() {
+      if (mode === "challenge") {
+        startChallengeRound();
+        return;
+      }
+      if (mode === "seq") {
+        currentNum = (currentNum + 1) % 10;
+      } else {
+        let n;
+        do { n = Math.floor(Math.random() * 10); } while (n === currentNum);
+        currentNum = n;
+      }
+      updateDisplay(true);
+    }
+
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
+
+    speakBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      speakNumber();
+    });
+
+    nextBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (mode === "challenge") {
+        startChallengeRound();
+      } else {
+        nextNumber();
+        if (mode === "seq") {
+          setTimeout(() => speakNumber(), SPEAK_DELAY);
+        } else {
+          setStatus("睇清楚，然後撳「講出嚟」");
+        }
+      }
+    });
+
+    if (window.speechSynthesis) {
+      speechSynthesis.getVoices();
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+
+    updateDisplay(true);
+    setStatus("撳「講出嚟」聽廣東話");
+  </script>
+</body>
+</html>
