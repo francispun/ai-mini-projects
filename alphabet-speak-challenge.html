@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>認字母 A–Z</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .group-switch {
+      display: flex;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,0.15);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 10px;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .group-btn {
+      flex: 1 1 auto;
+      min-width: 52px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .group-btn.active {
+      background: #fff;
+      color: #4f46e5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .mode-switch {
+      display: flex;
+      background: rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 3px;
+      margin-bottom: 12px;
+      gap: 3px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 4px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .mode-btn.active {
+      background: #fff;
+      color: #4f46e5;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Star bar */
+    .candy-bar {
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      min-height: 42px;
+      align-items: center;
+    }
+
+    .candy-bar.show {
+      display: flex;
+    }
+
+    .candy {
+      font-size: 2rem;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      opacity: 0.25;
+      filter: grayscale(1);
+    }
+
+    .candy.filled {
+      opacity: 1;
+      filter: none;
+      transform: scale(1.15);
+    }
+
+    .candy.pop {
+      animation: candyPop 0.45s ease;
+    }
+
+    @keyframes candyPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.5); }
+      100% { transform: scale(1.15); }
+    }
+
+    .number-box {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 24px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.22);
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number {
+      font-size: 6.5rem;
+      font-weight: 800;
+      color: #4f46e5;
+      line-height: 1;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+      letter-spacing: 0.02em;
+    }
+
+    .number.pop {
+      transform: scale(1.1);
+    }
+
+    .number.hidden {
+      visibility: hidden;
+    }
+
+    .letter-name {
+      font-size: 1.15rem;
+      color: #6b7280;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .options {
+      display: none;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .options.show {
+      display: flex;
+    }
+
+    .option-btn {
+      flex: 1;
+      border: none;
+      background: #fff;
+      color: #4f46e5;
+      font-size: 2.4rem;
+      font-weight: 800;
+      padding: 18px 6px;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      transition: transform 0.15s, background 0.2s;
+      touch-action: manipulation;
+    }
+
+    .option-btn:active {
+      transform: scale(0.95);
+    }
+
+    .option-btn.correct {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .option-btn.wrong {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .option-btn:disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button.action {
+      border: none;
+      border-radius: 18px;
+      padding: 14px 20px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      box-shadow: 0 7px 18px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #fff;
+      touch-action: manipulation;
+    }
+
+    button.action:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+
+    .btn-speak {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      min-height: 24px;
+      opacity: 0.95;
+    }
+
+    .status.ok { color: #bbf7d0; }
+    .status.error { color: #fecaca; }
+    .status.big { font-size: 1.1rem; font-weight: 600; }
+
+    .hide { display: none !important; }
+
+    /* Congrats modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px 28px;
+      max-width: 320px;
+      width: 88%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transform: scale(0.85);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-emoji {
+      font-size: 4rem;
+      margin-bottom: 12px;
+    }
+
+    .modal h2 {
+      color: #4f46e5;
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: #6b7280;
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+    }
+
+    .modal button {
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(34,197,94,0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>認字母 A–Z</h1>
+
+    <div class="group-switch" id="groupSwitch">
+      <button class="group-btn active" data-group="A-G" type="button">A–G</button>
+      <button class="group-btn" data-group="H-N" type="button">H–N</button>
+      <button class="group-btn" data-group="O-U" type="button">O–U</button>
+      <button class="group-btn" data-group="V-Z" type="button">V–Z</button>
+      <button class="group-btn" data-group="A-Z" type="button">A–Z</button>
+    </div>
+
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="seq" type="button">順序</button>
+      <button class="mode-btn" data-mode="rand" type="button">隨機</button>
+      <button class="mode-btn" data-mode="challenge" type="button">挑戰</button>
+    </div>
+
+    <!-- 5 stars -->
+    <div class="candy-bar" id="candyBar">
+      <span class="candy" data-i="0">⭐</span>
+      <span class="candy" data-i="1">⭐</span>
+      <span class="candy" data-i="2">⭐</span>
+      <span class="candy" data-i="3">⭐</span>
+      <span class="candy" data-i="4">⭐</span>
+    </div>
+
+    <div class="number-box" id="numberBox">
+      <div class="number" id="numberDisplay">A</div>
+      <div class="letter-name" id="letterNameDisplay">/eɪ/</div>
+    </div>
+
+    <div class="options" id="options">
+      <button class="option-btn" id="opt0" type="button">A</button>
+      <button class="option-btn" id="opt1" type="button">B</button>
+      <button class="option-btn" id="opt2" type="button">C</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="action btn-speak" id="speakBtn" type="button">
+        <span>🔊</span>
+        <span id="speakLabel">講出嚟</span>
+      </button>
+      <button class="action btn-next" id="nextBtn" type="button">
+        <span id="nextIcon">➡️</span>
+        <span id="nextLabel">下一個</span>
+      </button>
+    </div>
+
+    <div class="status" id="status">撳「講出嚟」聽字母發音</div>
+  </div>
+
+  <!-- Congrats Modal -->
+  <div class="modal-overlay" id="congratsModal">
+    <div class="modal">
+      <div class="modal-emoji">🎉⭐🎉</div>
+      <h2>全部集齊！</h2>
+      <p>好叻呀！完成喇！</p>
+      <button id="modalCloseBtn" type="button">太棒了！</button>
+    </div>
+  </div>
+
+  <script>
+    const GROUPS = {
+      "A-G": ["A","B","C","D","E","F","G"],
+      "H-N": ["H","I","J","K","L","M","N"],
+      "O-U": ["O","P","Q","R","S","T","U"],
+      "V-Z": ["V","W","X","Y","Z"],
+      "A-Z": ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    };
+
+    // Simple phonetic guides (IPA-ish for kids)
+    const PHONETICS = {
+      A: "/eɪ/", B: "/biː/", C: "/siː/", D: "/diː/", E: "/iː/",
+      F: "/ɛf/", G: "/dʒiː/", H: "/eɪtʃ/", I: "/aɪ/", J: "/dʒeɪ/",
+      K: "/keɪ/", L: "/ɛl/", M: "/ɛm/", N: "/ɛn/", O: "/oʊ/",
+      P: "/piː/", Q: "/kjuː/", R: "/ɑːr/", S: "/ɛs/", T: "/tiː/",
+      U: "/juː/", V: "/viː/", W: "/ˈdʌbəl.juː/", X: "/ɛks/", Y: "/waɪ/", Z: "/zɛd/"
+    };
+
+    let currentGroup = "A-G";
+    let letters = GROUPS[currentGroup];
+    let currentIndex = 0;
+    let currentLetter = letters[0];
+    let mode = "seq";
+    let candyCount = 0;
+    let waitingAnswer = false;
+    let wrongOnce = false;
+    const SPEAK_DELAY = 700;
+    const MAX_CANDY = 5;
+
+    const numberDisplay = document.getElementById("numberDisplay");
+    const letterNameDisplay = document.getElementById("letterNameDisplay");
+    const optionsEl = document.getElementById("options");
+    const candyBar = document.getElementById("candyBar");
+    const speakBtn = document.getElementById("speakBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const speakLabel = document.getElementById("speakLabel");
+    const nextLabel = document.getElementById("nextLabel");
+    const nextIcon = document.getElementById("nextIcon");
+    const statusEl = document.getElementById("status");
+    const candyEls = document.querySelectorAll(".candy");
+    const optBtns = [
+      document.getElementById("opt0"),
+      document.getElementById("opt1"),
+      document.getElementById("opt2")
+    ];
+
+    let audioCtx = null;
+
+    function setStatus(msg, type = "") {
+      statusEl.textContent = msg;
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function updateCandies(animateIndex = -1) {
+      candyEls.forEach((el, i) => {
+        el.classList.remove("pop");
+        if (i < candyCount) {
+          el.classList.add("filled");
+          if (i === animateIndex) {
+            void el.offsetWidth;
+            el.classList.add("pop");
+          }
+        } else {
+          el.classList.remove("filled");
+        }
+      });
+    }
+
+    function addCandy() {
+      if (candyCount < MAX_CANDY) {
+        candyCount++;
+        updateCandies(candyCount - 1);
+        if (candyCount >= MAX_CANDY) {
+          setTimeout(() => {
+            setStatus("🎉 全部集齊！好叻呀！完成喇！", "ok");
+            playSuccessSound();
+            optBtns.forEach(b => b.disabled = true);
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = "1";
+            nextLabel.textContent = "重新開始";
+            nextIcon.textContent = "🔄";
+            document.getElementById("congratsModal").classList.add("show");
+          }, 400);
+        }
+      } else {
+        updateCandies();
+      }
+    }
+
+    function updateDisplay(showLetter = true) {
+      numberDisplay.textContent = currentLetter;
+      letterNameDisplay.textContent = PHONETICS[currentLetter] || "";
+
+      if (showLetter) {
+        numberDisplay.classList.remove("hidden");
+        letterNameDisplay.style.visibility = "visible";
+      } else {
+        numberDisplay.classList.add("hidden");
+        letterNameDisplay.style.visibility = "hidden";
+      }
+
+      numberDisplay.classList.remove("pop");
+      void numberDisplay.offsetWidth;
+      numberDisplay.classList.add("pop");
+    }
+
+    function unlockSpeech() {
+      return new Promise(resolve => {
+        if (!window.speechSynthesis) return resolve(false);
+        try {
+          const u = new SpeechSynthesisUtterance(" ");
+          u.volume = 0.01;
+          u.rate = 2;
+          u.onend = u.onerror = () => resolve(true);
+          speechSynthesis.speak(u);
+          setTimeout(() => resolve(true), 200);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    function getVoice() {
+      const voices = speechSynthesis.getVoices() || [];
+      // Prefer British English for letter names (Z = zed)
+      return (
+        voices.find(v => v.lang === "en-GB") ||
+        voices.find(v => v.lang === "en-US") ||
+        voices.find(v => v.lang.startsWith("en")) ||
+        null
+      );
+    }
+
+    async function speakLetter(letter = currentLetter) {
+      if (!window.speechSynthesis) {
+        setStatus("呢部電話唔支援語音", "error");
+        return;
+      }
+
+      speechSynthesis.cancel();
+      if (speechSynthesis.paused) speechSynthesis.resume();
+
+      const u = new SpeechSynthesisUtterance(letter);
+      u.lang = "en-GB";
+      u.rate = 0.85;
+      u.pitch = 1;
+      u.volume = 1;
+
+      const voice = getVoice();
+      if (voice) {
+        u.voice = voice;
+        u.lang = voice.lang;
+      }
+
+      u.onstart = () => setStatus("講緊：「" + letter + "」", "ok");
+      u.onend = () => {
+        if (mode !== "challenge" || !waitingAnswer) {
+          setStatus("撳「講出嚟」再聽一次");
+        }
+      };
+      u.onerror = () => setStatus("語音失敗，再試一次", "error");
+
+      await unlockSpeech();
+      speechSynthesis.speak(u);
+    }
+
+    function setGroup(newGroup) {
+      currentGroup = newGroup;
+      letters = GROUPS[currentGroup];
+      currentIndex = 0;
+      currentLetter = letters[0];
+      candyCount = 0;
+      updateCandies();
+
+      document.querySelectorAll(".group-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.group === currentGroup);
+      });
+
+      // Reset mode UI state when group changes
+      waitingAnswer = false;
+      wrongOnce = false;
+      optionsEl.classList.remove("show");
+      speakBtn.classList.remove("hide");
+      nextBtn.classList.remove("hide");
+
+      if (mode === "challenge") {
+        candyBar.classList.add("show");
+        nextLabel.textContent = "下一題";
+        nextIcon.textContent = "▶️";
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = "1";
+        speakLabel.textContent = "再聽一次";
+        startChallengeRound();
+      } else {
+        candyBar.classList.remove("show");
+        if (mode === "seq") {
+          nextLabel.textContent = "下一個";
+          nextIcon.textContent = "➡️";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("順序模式：自動讀音");
+        } else {
+          nextLabel.textContent = "換一個";
+          nextIcon.textContent = "🎲";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("隨機模式：自己撳先讀");
+        }
+      }
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      waitingAnswer = false;
+      wrongOnce = false;
+      candyCount = 0;
+      updateCandies();
+
+      document.querySelectorAll(".mode-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.mode === mode);
+      });
+
+      optionsEl.classList.remove("show");
+      speakBtn.classList.remove("hide");
+      nextBtn.classList.remove("hide");
+
+      if (mode === "challenge") {
+        candyBar.classList.add("show");
+        nextLabel.textContent = "下一題";
+        nextIcon.textContent = "▶️";
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = "1";
+        speakLabel.textContent = "再聽一次";
+        startChallengeRound();
+      } else {
+        candyBar.classList.remove("show");
+        if (mode === "seq") {
+          currentIndex = 0;
+          currentLetter = letters[0];
+          nextLabel.textContent = "下一個";
+          nextIcon.textContent = "➡️";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("順序模式：自動讀音");
+        } else {
+          nextLabel.textContent = "換一個";
+          nextIcon.textContent = "🎲";
+          speakLabel.textContent = "講出嚟";
+          updateDisplay(true);
+          setStatus("隨機模式：自己撳先讀");
+        }
+      }
+    }
+
+    function startChallengeRound() {
+      waitingAnswer = true;
+      wrongOnce = false;
+      currentIndex = Math.floor(Math.random() * letters.length);
+      currentLetter = letters[currentIndex];
+      updateDisplay(false);
+
+      let opts = [currentLetter];
+      while (opts.length < 3) {
+        const n = letters[Math.floor(Math.random() * letters.length)];
+        if (!opts.includes(n)) opts.push(n);
+      }
+      opts = opts.sort(() => Math.random() - 0.5);
+
+      optBtns.forEach((btn, i) => {
+        btn.textContent = opts[i];
+        btn.disabled = false;
+        btn.classList.remove("correct", "wrong");
+        btn.onclick = () => checkAnswer(opts[i], btn);
+      });
+
+      optionsEl.classList.add("show");
+      setStatus("聽完聲音，揀正確字母", "big");
+      setTimeout(() => speakLetter(currentLetter), 400);
+    }
+
+    function playSuccessSound() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+
+        const notes = [
+          { freq: 523.25, start: 0.00, dur: 0.12 },
+          { freq: 659.25, start: 0.10, dur: 0.12 },
+          { freq: 783.99, start: 0.20, dur: 0.12 },
+          { freq: 1046.5, start: 0.30, dur: 0.25 },
+          { freq: 1318.5, start: 0.42, dur: 0.18 },
+          { freq: 1568.0, start: 0.52, dur: 0.22 }
+        ];
+        notes.forEach(note => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.value = note.freq;
+          const t = audioCtx.currentTime + note.start;
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.4, t + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + note.dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + note.dur + 0.03);
+        });
+      } catch (e) {}
+    }
+
+    function checkAnswer(chosen, btn) {
+      if (!waitingAnswer) return;
+
+      if (chosen === currentLetter) {
+        waitingAnswer = false;
+        optBtns.forEach(b => b.disabled = true);
+        btn.classList.add("correct");
+
+        if (!wrongOnce) {
+          addCandy();
+          setStatus("✅ 正確！得到一粒星！", "ok");
+        } else {
+          setStatus("✅ 正確！下次一次過就得星啦！", "ok");
+        }
+
+        numberDisplay.classList.remove("hidden");
+        letterNameDisplay.style.visibility = "visible";
+        playSuccessSound();
+
+        if (candyCount < MAX_CANDY) {
+          setTimeout(() => {
+            if (mode === "challenge") startChallengeRound();
+          }, 1200);
+        }
+      } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+
+        if (!wrongOnce) {
+          wrongOnce = true;
+          setStatus("❌ 唔啱，再聽一次再試！", "error");
+          setTimeout(() => speakLetter(currentLetter), 300);
+        } else {
+          waitingAnswer = false;
+          optBtns.forEach(b => b.disabled = true);
+          optBtns.forEach(b => {
+            if (b.textContent === currentLetter) {
+              b.classList.add("correct");
+            }
+          });
+          setStatus("唔緊要，繼續努力！", "error");
+          numberDisplay.classList.remove("hidden");
+          letterNameDisplay.style.visibility = "visible";
+        }
+      }
+    }
+
+    function nextLetter() {
+      if (mode === "challenge") {
+        startChallengeRound();
+        return;
+      }
+      if (mode === "seq") {
+        currentIndex = (currentIndex + 1) % letters.length;
+        currentLetter = letters[currentIndex];
+      } else {
+        let n;
+        do {
+          n = Math.floor(Math.random() * letters.length);
+        } while (letters[n] === currentLetter && letters.length > 1);
+        currentIndex = n;
+        currentLetter = letters[currentIndex];
+      }
+      updateDisplay(true);
+    }
+
+    document.querySelectorAll(".group-btn").forEach(btn => {
+      btn.addEventListener("click", () => setGroup(btn.dataset.group));
+    });
+
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
+
+    speakBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      speakLetter();
+    });
+
+    nextBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (mode === "challenge") {
+        if (nextLabel.textContent === "重新開始") {
+          candyCount = 0;
+          updateCandies();
+          nextLabel.textContent = "下一題";
+          nextIcon.textContent = "▶️";
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = "1";
+          setStatus("重新開始！加油！");
+        }
+        startChallengeRound();
+      } else {
+        nextLetter();
+        if (mode === "seq") {
+          setTimeout(() => speakLetter(), SPEAK_DELAY);
+        } else {
+          setStatus("睇清楚，然後撳「講出嚟」");
+        }
+      }
+    });
+
+    if (window.speechSynthesis) {
+      speechSynthesis.getVoices();
+      speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+
+    document.getElementById("modalCloseBtn").addEventListener("click", () => {
+      document.getElementById("congratsModal").classList.remove("show");
+    });
+
+    updateDisplay(true);
+    updateCandies();
+    setStatus("撳「講出嚟」聽字母發音");
+  </script>
+</body>
+</html>
