@@ -519,13 +519,43 @@
 
     function getVoice() {
       const voices = speechSynthesis.getVoices() || [];
-      // Prefer British English for letter names (Z = zed)
-      return (
-        voices.find(v => v.lang === "en-GB") ||
-        voices.find(v => v.lang === "en-US") ||
-        voices.find(v => v.lang.startsWith("en")) ||
-        null
+      if (!voices.length) return null;
+
+      const name = (v) => (v.name || "").toLowerCase();
+
+      // Strong preference for known female voices (iOS + others)
+      const femaleNames = [
+        "samantha", "karen", "moira", "tessa", "fiona", "victoria",
+        "serena", "zira", "susan", "martha", "allison", "ava",
+        "google uk english female", "microsoft zira", "microsoft susan",
+        "female", "woman"
+      ];
+
+      // 1. British English female first (keeps Z = "zed")
+      let voice = voices.find(v =>
+        (v.lang === "en-GB" || v.lang.startsWith("en-GB")) &&
+        femaleNames.some(n => name(v).includes(n))
       );
+
+      // 2. Any English female
+      if (!voice) {
+        voice = voices.find(v =>
+          v.lang.startsWith("en") &&
+          femaleNames.some(n => name(v).includes(n))
+        );
+      }
+
+      // 3. Fall back to any British English
+      if (!voice) {
+        voice = voices.find(v => v.lang === "en-GB" || v.lang.startsWith("en-GB"));
+      }
+
+      // 4. Any English
+      if (!voice) {
+        voice = voices.find(v => v.lang.startsWith("en"));
+      }
+
+      return voice || null;
     }
 
     async function speakLetter(letter = currentLetter) {
@@ -537,10 +567,11 @@
       speechSynthesis.cancel();
       if (speechSynthesis.paused) speechSynthesis.resume();
 
-      const u = new SpeechSynthesisUtterance(letter);
+      // Speak lowercase so the voice says "A" instead of "capital A"
+      const u = new SpeechSynthesisUtterance(letter.toLowerCase());
       u.lang = "en-GB";
       u.rate = 0.85;
-      u.pitch = 1;
+      u.pitch = 1.15;   // Slightly higher → more female / kid-friendly
       u.volume = 1;
 
       const voice = getVoice();
